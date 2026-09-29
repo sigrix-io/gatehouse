@@ -1,0 +1,26 @@
+# vitest and jsdom are the only dependencies, both dev-only, and both pinned by
+# the committed lockfile. A pin only stays correct if something bumps it, and
+# left alone the test runner drifts away from whatever contributors have — the
+# same failure pinning exists to prevent, arriving from the other direction and
+# with a green check the whole way.
+#
+# The matrix is what makes this safe rather than merely automatic: a bump that
+# breaks anything arrives as a red check on a pull request nobody has merged.
+#
+# Two GitHub behaviours worth knowing: this file is read from the default
+# branch, so editing it on a branch changes nothing until it merges; and
+# Dependabot needs the dependency graph enabled on the repository, which this
+# file cannot assert for itself.
+#
+# Deliberately no auto-merge.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

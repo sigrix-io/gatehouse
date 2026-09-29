@@ -1,0 +1,213 @@
+/* Styles for Gatehouse, the Postern run renderer.
+ *
+ * The scripts draw `run-*` classes and carry no CSS of their own, so a page
+ * that mounts the renderer links this file. Every class the renderer emits has
+ * a rule here, which `tests/stylesheet.test.js` checks.
+ *
+ * Colours are custom properties on `.run-shell`: each `--run-*` reads a host's
+ * `--sx-*` token when the page defines one and falls back to the value beside
+ * it, so the stylesheet works alone and a host can theme it. Light values are
+ * unprefixed; dark ones sit under `[data-theme="dark"]` on any ancestor.
+ */
+
+.run-shell {
+  --run-line: var(--sx-line, #E6E8EE);
+  --run-surface: var(--sx-surface, #FFFFFF);
+  --run-surface-2: var(--sx-surface-2, #F7F8FB);
+  --run-text: var(--sx-text, #0E1320);
+  --run-text-2: var(--sx-text-2, #4B5263);
+  --run-text-3: var(--sx-text-3, #616879);
+  --run-brand: var(--sx-brand, #2A33C4);
+  --run-brand-text: var(--sx-brand-text, #1A1F6B);
+  /* A literal, not var(--sx-ok): --sx-ok is a fill and #1F9D55 measured
+     3.49:1 as this tick's ink on white. #146B3A is 6.57:1. The dark value
+     below is left on --sx-ok, which is a light green there and fine. */
+  --run-ok: #146B3A;
+  --run-warn: var(--sx-warn, #C77800);
+  --run-danger: var(--sx-danger, #DC2C50);
+  --run-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-areas: "head rail" "form rail" "controls rail" "output rail";
+  gap: 0 24px;
+  align-items: start;
+  color: var(--run-text);
+}
+@media (max-width: 960px) {
+  .run-shell { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "rail" "form" "controls" "output"; }
+}
+
+/* ---------- header ---------- */
+.run-header { grid-area: head; margin-bottom: 18px; }
+/* `.run-title` is the class the renderer actually emits; the element selectors
+ * beside it are what styled it before, and they stay because they also catch a
+ * heading a future screen puts in this band. Naming the class is what lets the
+ * stylesheet contract test see that this heading is covered — it was styled by
+ * element only, so the guard reported it unstyled the moment its scan learned
+ * to read `el('h1', …)`. */
+.run-header h1, .run-header h2, .run-title { font-size: 22px; font-weight: 660; margin: 0 0 6px; letter-spacing: -0.02em; }
+.run-summary { color: var(--run-text-2); margin: 0; max-width: 64ch; }
+.run-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+/* Shown verbatim: the identifier is what an operator types into `.env` and
+ * what the runner prints at boot. One spelling, as given. */
+.run-agent-id, .run-version {
+  font-family: var(--run-mono); font-size: 11.5px; color: var(--run-text-2);
+  background: var(--run-surface-2); border: 1px solid var(--run-line);
+  padding: 4px 9px; border-radius: 7px;
+}
+/* An empty chip is a real state rather than a preview artifact: a bundle's
+ * `postern.json` deliberately carries no `agent.id` — the runner fills it from
+ * the environment, so a stale document can never drive a check for the wrong
+ * listing — and a client reading that document straight off disk has nothing
+ * to print. Same `:empty` idiom the timeline, result and usage rows use. */
+.run-agent-id:empty, .run-version:empty { display: none; }
+
+/* ---------- readiness rail ---------- */
+.run-readiness {
+  grid-area: rail;
+  background: var(--run-surface); border: 1px solid var(--run-line);
+  border-radius: 14px; padding: 16px;
+}
+.run-state { font-size: 12px; color: var(--run-text-2); margin: 0 0 4px; font-weight: 600; }
+.run-level, .run-limit, .run-update { font-size: 11.5px; color: var(--run-text-3); margin: 0 0 8px; }
+.run-entitlement { padding: 11px 13px; border-radius: 10px; font-size: 12.5px; line-height: 1.5; margin: 12px 0; border: 1px solid var(--run-line); background: var(--run-surface-2); color: var(--run-text-2); }
+.run-entitlement--quiet { color: var(--run-text-3); }
+.run-entitlement--caution { border-color: var(--run-warn); }
+.run-entitlement--blocked { border-color: var(--run-danger); color: var(--run-text); }
+
+/* One credential is a flat run of inline siblings - `<code>` for the name,
+ * then a span carrying the *words* "set" / "not set", then the purpose, then
+ * an optional link. Laying the item out as a grid puts each sibling in its own
+ * cell and wraps the purpose one word per line; it has to stay an inline flow.
+ * `run-credential-where` is a sibling of the list, not of these. */
+.run-credentials { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 8px; }
+.run-credential { font-size: 12.5px; line-height: 1.5; }
+.run-credential-env { font-family: var(--run-mono); font-size: 11.5px; color: var(--run-text); }
+/* Both states stated, neither inherited. A satisfied key that is only green
+ * because the default happens to be green converges with a missing one the
+ * moment the default moves, and the two are the whole point of the list. */
+.run-credential-tick { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--run-text-3); }
+.run-credential.is-satisfied .run-credential-tick { color: var(--run-ok); }
+.run-credential.is-missing .run-credential-tick { color: var(--run-danger); }
+.run-credential-purpose { font-size: 11.5px; color: var(--run-text-3); }
+.run-credential-where { font-size: 11.5px; color: var(--run-text-2); margin: 0 0 10px; }
+.run-credential-link { font-size: 11.5px; margin-left: 6px; }
+
+.run-tools { margin: 0 0 8px; }
+.run-tool-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 5px; }
+.run-tool { font-family: var(--run-mono); font-size: 11px; color: var(--run-text-3); }
+.run-tool::after { content: ","; }
+.run-tool:last-child::after { content: ""; }
+
+/* ---------- templates ---------- */
+.run-templates { grid-area: head; align-self: end; }
+/* Genuinely unstyled until now, and it is an `<h2>`, so it rendered at the
+ * browser's default 1.5em directly above a row of 12.5px chips. Found by the
+ * same widened scan as `.run-title` — the guard could not see either, because
+ * its regex required a tag name of letters only and both are `h`-plus-digit. */
+.run-templates-title { font-size: 12px; font-weight: 600; color: var(--run-text-3); margin: 0 0 8px; text-transform: none; }
+.run-template-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.run-template-chip {
+  font: inherit; font-size: 12.5px; cursor: pointer; min-height: 0;
+  background: var(--run-surface); border: 1px solid var(--run-line);
+  color: var(--run-text-2); border-radius: 999px; padding: 6px 13px;
+}
+.run-template-chip:hover { color: var(--run-text); border-color: var(--run-brand); }
+.run-template-output { margin-top: 10px; font-size: 12px; color: var(--run-text-3); }
+.run-template-output-body { white-space: pre-wrap; font-size: 12.5px; color: var(--run-text-2); margin-top: 4px; }
+
+/* ---------- form ---------- */
+.run-form { grid-area: form; background: var(--run-surface); border: 1px solid var(--run-line); border-radius: 14px; overflow: hidden; }
+.run-field { padding: 14px 16px; }
+.run-field + .run-field { border-top: 1px solid var(--run-line); }
+.run-field-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.run-field-control {
+  width: 100%; font: inherit; font-size: 14px; color: var(--run-text);
+  background: var(--run-surface-2); border: 1px solid var(--run-line);
+  border-radius: 10px; padding: 9px 11px; min-height: 0;
+}
+.run-field-control--large { min-height: 88px; resize: vertical; line-height: 1.5; }
+.run-field-control:focus { outline: 2px solid var(--run-brand); outline-offset: -1px; }
+.run-field-control.is-invalid { border-color: var(--run-danger); }
+.run-field-note { font-size: 11.5px; color: var(--run-text-3); margin: 6px 0 0; }
+/* The seller's own help text, not the client's. Sits a step darker
+ * than `.run-field-note` because a note is this page apologising for something
+ * it could not honour, and this is the listing telling the buyer what to
+ * write — they should not read as the same voice. */
+.run-field-help { font-size: 12.5px; color: var(--run-text-2); margin: 6px 0 0; max-width: 64ch; }
+
+/* ---------- controls ---------- */
+.run-controls { grid-area: controls; margin-top: 18px; }
+.run-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.run-go, .run-stop, .run-retry, .run-download {
+  font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer;
+  border-radius: 10px; padding: 0 16px; height: 38px; min-height: 0;
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid transparent; text-decoration: none;
+}
+.run-go { background: var(--run-brand); color: #FFFFFF; }
+.run-stop, .run-retry, .run-download { background: var(--run-surface); color: var(--run-text); border-color: var(--run-line); }
+.run-go:disabled, .run-stop:disabled, .run-retry:disabled { opacity: 0.45; cursor: not-allowed; }
+.run-go[hidden], .run-stop[hidden], .run-retry[hidden], .run-download[hidden] { display: none; }
+
+.run-write-gate { display: flex; gap: 9px; align-items: flex-start; margin-top: 12px; max-width: 64ch; }
+.run-write-label { font-size: 12.5px; color: var(--run-text-2); cursor: pointer; }
+/* A host's stylesheet may floor every input at `min-height: 44px`, site-wide and
+ * outside any media query, and `min-height` beats `height` — so without this
+ * the box renders 44px tall and sits half a line below its own sentence. */
+.run-write-check { margin: 2px 0 0; flex: none; width: 15px; height: 15px; min-height: 0; }
+/* Given back where the floor exists for a reason. Declared *after* the opt-out:
+ * a media query contributes no specificity, so these two tie on identical
+ * selectors and document order alone decides. Fold this block upward and the
+ * opt-out silently wins under a thumb too. */
+@media (pointer: coarse) {
+  .run-write-check { width: 22px; height: 22px; min-height: 22px; }
+}
+.run-retry-note, .run-notice { font-size: 12px; color: var(--run-text-3); margin: 10px 0 0; max-width: 64ch; }
+
+/* ---------- output ---------- */
+.run-output { grid-area: output; margin-top: 22px; border: 1px solid var(--run-line); border-radius: 14px; background: var(--run-surface); padding: 16px; }
+.run-timeline { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 1px; background: var(--run-line); border: 1px solid var(--run-line); border-radius: 10px; overflow: hidden; }
+.run-timeline:empty { display: none; }
+.run-timeline-entry { background: var(--run-surface); padding: 9px 12px; font-family: var(--run-mono); font-size: 12px; color: var(--run-text-2); }
+.run-result { white-space: pre-wrap; font-size: 14px; line-height: 1.62; max-height: 380px; overflow: auto; }
+.run-result:empty { display: none; }
+
+/* The composed result, in the `markdown` output mode. A second node
+ * beside `.run-result` rather than a mode switch on it: the `<pre>` is what a
+ * stream fills token by token, and `<pre>` takes phrasing content only, so
+ * headings and lists cannot be built inside it. Both are capped at the same
+ * height, or one mode scrolls its panel and the other grows it. */
+.run-result-rendered { font-size: 14px; line-height: 1.62; max-height: 380px; overflow: auto; }
+.run-result-rendered:empty { display: none; }
+.run-md-heading { font-size: 15px; font-weight: 650; color: var(--run-text); margin: 16px 0 6px; }
+.run-md-heading:first-child { margin-top: 0; }
+.run-md-paragraph { margin: 0 0 10px; max-width: 72ch; }
+.run-md-list { margin: 0 0 10px; padding-left: 20px; max-width: 72ch; }
+.run-md-item { margin: 0 0 3px; }
+/* Never highlighted, and never `white-space: pre-wrap`. This is a fenced block
+ * an agent emitted, so it is shown exactly as it arrived — wrapping it would
+ * change what a buyer copies. */
+.run-md-code {
+  white-space: pre; overflow-x: auto; margin: 0 0 12px;
+  font-family: var(--run-mono); font-size: 12.5px; line-height: 1.55;
+  background: var(--run-surface-2); border: 1px solid var(--run-line);
+  border-radius: 10px; padding: 10px 12px;
+}
+.run-usage { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12px; color: var(--run-text-3); margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--run-line); }
+.run-usage:empty { display: none; }
+.run-refuse { border-left: 3px solid var(--run-danger); padding: 14px 16px; background: var(--run-surface-2); border-radius: 0 10px 10px 0; margin: 0; font-size: 13.5px; }
+
+[data-theme="dark"] .run-shell {
+  --run-line: var(--sx-line, #232936);
+  --run-surface: var(--sx-surface, #14181F);
+  --run-surface-2: var(--sx-surface-2, #1A1F28);
+  --run-text: var(--sx-text, #E7EAF0);
+  --run-text-2: var(--sx-text-2, #AAB2C0);
+  --run-text-3: var(--sx-text-3, #858DA0);
+  --run-brand: var(--sx-brand, #3D4DFF);
+  --run-brand-text: var(--sx-brand-text, #A9B4FF);
+  --run-ok: var(--sx-ok, #6EE7A1);
+  --run-warn: var(--sx-warn, #F5B454);
+  --run-danger: var(--sx-danger, #F47B7B);
+}

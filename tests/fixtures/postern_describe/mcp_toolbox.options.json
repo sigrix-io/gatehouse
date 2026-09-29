@@ -1,0 +1,52 @@
+{
+  "choice": {
+    "key": "tool",
+    "groups": {
+      "watch_models": {
+        "about": "Lists the models a provider released recently.",
+        "inputs": [
+          "watch_models.provider",
+          "watch_models.since_days",
+          "watch_models.include_previews"
+        ],
+        "required": [
+          "watch_models.provider"
+        ]
+      },
+      "post_digest": {
+        "about": "Posts the week's releases to a Slack channel as a task-list, one item per model.",
+        "inputs": [
+          "post_digest.channel",
+          "post_digest.filters"
+        ],
+        "required": [
+          "post_digest.channel"
+        ]
+      }
+    }
+  },
+  "composition": {
+    "inputs": [
+      {
+        "key": "watch_models.provider",
+        "help": "Whose releases to list."
+      },
+      {
+        "key": "watch_models.since_days",
+        "help": "How far back to look, in days."
+      },
+      {
+        "key": "watch_models.include_previews",
+        "help": "Also list preview models."
+      },
+      {
+        "key": "post_digest.channel",
+        "help": "The channel to post to, without the #."
+      },
+      {
+        "key": "post_digest.filters",
+        "help": "Which releases to include, as JSON, e.g. {\"provider\": \"openai\"}."
+      }
+    ]
+  }
+}

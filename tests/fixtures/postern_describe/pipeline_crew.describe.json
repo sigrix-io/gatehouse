@@ -1,0 +1,56 @@
+{
+  "postern": "0.1",
+  "agent": {
+    "name": "Contract Review Crew",
+    "version": "0.0.0+3f7a9c2b8e41",
+    "id": "acme/contract-review-crew",
+    "summary": "Reads a contract and returns the clauses worth a second look."
+  },
+  "inputs": [
+    {
+      "key": "prompt",
+      "label": "Your question or brief",
+      "type": "text",
+      "required": true,
+      "default": null
+    },
+    {
+      "key": "jurisdiction",
+      "label": "Jurisdiction",
+      "type": "text",
+      "required": false,
+      "default": "England and Wales"
+    },
+    {
+      "key": "risk_appetite",
+      "label": "Risk appetite",
+      "type": "select",
+      "required": true,
+      "default": "balanced",
+      "validation": {
+        "options": [
+          "conservative",
+          "balanced",
+          "aggressive"
+        ]
+      }
+    }
+  ],
+  "output": {
+    "type": "text",
+    "example": "## Clauses to review\n\n1. Clause 7.2 \u2014 liability cap."
+  },
+  "capabilities": {
+    "tools": [
+      "file_read"
+    ],
+    "write_tools": []
+  },
+  "credentials": [
+    {
+      "env": "OPENAI_API_KEY",
+      "purpose": "Runs the agents in this crew.",
+      "signup_url": "https://platform.openai.com/api-keys"
+    }
+  ]
+}

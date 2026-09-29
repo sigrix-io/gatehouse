@@ -1,0 +1,32 @@
+{
+  "postern": "0.1",
+  "level": 3,
+  "state": "ready",
+  "agent": {
+    "id": "acme/contract-review-crew",
+    "version": "0.0.0+3f7a9c2b8e41"
+  },
+  "entitlement": {
+    "state": "active",
+    "checked_at": "2026-09-02T11:00:00Z",
+    "stale_after_seconds": 3600,
+    "grace_seconds": 86400
+  },
+  "credentials": {
+    "satisfied": false,
+    "missing": [
+      "OPENAI_API_KEY"
+    ]
+  },
+  "limits": {
+    "max_run_seconds": 300,
+    "max_concurrent_runs": 1,
+    "max_output_bytes": 1048576,
+    "idempotency_retention_seconds": 86400
+  },
+  "update": {
+    "state": "update_available",
+    "current": "0.0.0+3f7a9c2b8e41",
+    "latest": "0.0.0+9d2e5f1a7c33"
+  }
+}

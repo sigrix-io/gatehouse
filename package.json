@@ -1,0 +1,44 @@
+{
+  "name": "@sigrix-io/gatehouse",
+  "version": "0.1.0",
+  "description": "A browser client for Postern: draws a run page from a describe document and connects it to the four verbs. No build step and no dependencies.",
+  "license": "Apache-2.0",
+  "author": "Sigrix",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sigrix-io/gatehouse.git"
+  },
+  "homepage": "https://github.com/sigrix-io/gatehouse",
+  "bugs": "https://github.com/sigrix-io/gatehouse/issues",
+  "keywords": [
+    "postern",
+    "agent",
+    "mcp",
+    "sse",
+    "browser",
+    "no-build"
+  ],
+  "type": "commonjs",
+  "files": [
+    "src/",
+    "NOTICE"
+  ],
+  "exports": {
+    "./postern_client.js": "./src/postern_client.js",
+    "./run_view_model.js": "./src/run_view_model.js",
+    "./refusal_copy.js": "./src/refusal_copy.js",
+    "./run_renderer.js": "./src/run_renderer.js",
+    "./gatehouse.css": "./src/gatehouse.css",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "jsdom": "30.1.0",
+    "vitest": "5.0.1"
+  }
+}

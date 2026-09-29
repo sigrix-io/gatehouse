@@ -1,0 +1,156 @@
+{
+  "postern": "0.1",
+  "agent": {
+    "id": "acme/modelwatch",
+    "name": "Model Watch",
+    "version": "1.2.0",
+    "summary": "An MCP server offering 2 tools."
+  },
+  "inputs": [
+    {
+      "key": "tool",
+      "label": "Tool",
+      "type": "select",
+      "required": true,
+      "default": "watch_models",
+      "validation": {
+        "options": [
+          "watch_models",
+          "post_digest"
+        ]
+      }
+    },
+    {
+      "key": "watch_models.provider",
+      "label": "Provider",
+      "type": "select",
+      "required": false,
+      "default": null,
+      "validation": {
+        "options": [
+          "openai",
+          "google",
+          "xai",
+          "anthropic"
+        ]
+      },
+      "org.sigrix": {
+        "mcp": {
+          "tool": "watch_models",
+          "argument": "provider",
+          "required": true,
+          "kind": "enum",
+          "description": "Whose releases to list."
+        }
+      }
+    },
+    {
+      "key": "watch_models.since_days",
+      "label": "Since days",
+      "type": "number",
+      "required": false,
+      "default": 7,
+      "validation": {
+        "min": 1,
+        "max": 90
+      },
+      "org.sigrix": {
+        "mcp": {
+          "tool": "watch_models",
+          "argument": "since_days",
+          "required": false,
+          "kind": "integer",
+          "description": "How far back to look, in days."
+        }
+      }
+    },
+    {
+      "key": "watch_models.include_previews",
+      "label": "Include previews",
+      "type": "select",
+      "required": false,
+      "default": null,
+      "validation": {
+        "options": [
+          "true",
+          "false"
+        ]
+      },
+      "org.sigrix": {
+        "mcp": {
+          "tool": "watch_models",
+          "argument": "include_previews",
+          "required": false,
+          "kind": "boolean",
+          "description": "Also list preview models."
+        }
+      }
+    },
+    {
+      "key": "post_digest.channel",
+      "label": "Channel",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "validation": {
+        "max_length": 80
+      },
+      "org.sigrix": {
+        "mcp": {
+          "tool": "post_digest",
+          "argument": "channel",
+          "required": true,
+          "kind": "text",
+          "description": "The channel to post to, without the #."
+        }
+      }
+    },
+    {
+      "key": "post_digest.filters",
+      "label": "Filters (JSON)",
+      "type": "text",
+      "required": false,
+      "default": null,
+      "org.sigrix": {
+        "mcp": {
+          "tool": "post_digest",
+          "argument": "filters",
+          "required": false,
+          "kind": "json",
+          "description": "Which releases to include, as JSON, e.g. {\"provider\": \"openai\"}."
+        }
+      }
+    }
+  ],
+  "output": {
+    "type": "text"
+  },
+  "capabilities": {
+    "tools": [
+      "watch_models",
+      "post_digest"
+    ],
+    "write_tools": [
+      "post_digest"
+    ]
+  },
+  "credentials": [],
+  "org.sigrix": {
+    "mcp": {
+      "protocol": "",
+      "tool_input": "tool",
+      "tools": [
+        {
+          "name": "watch_models",
+          "title": "Watch models",
+          "description": "Lists the models a provider released recently."
+        },
+        {
+          "name": "post_digest",
+          "title": "Post a digest",
+          "description": "Posts the week's releases to a Slack channel as a task-list, one item per model."
+        }
+      ]
+    }
+  }
+}

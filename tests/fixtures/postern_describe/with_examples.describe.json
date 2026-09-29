@@ -1,0 +1,49 @@
+{
+  "postern": "0.1",
+  "agent": {
+    "id": "acme/tagline-writer",
+    "name": "Tagline Writer",
+    "version": "0.2.0",
+    "summary": "Turns a product description into three taglines."
+  },
+  "inputs": [
+    {
+      "key": "prompt",
+      "label": "Describe the product",
+      "type": "text",
+      "required": true
+    },
+    {
+      "key": "tone",
+      "label": "Tone",
+      "type": "select",
+      "required": false,
+      "default": "plain",
+      "validation": {
+        "options": [
+          "plain",
+          "playful"
+        ]
+      }
+    }
+  ],
+  "output": {
+    "type": "text"
+  },
+  "examples": [
+    {
+      "inputs": {
+        "prompt": "A pocket notebook for field biologists.",
+        "tone": "plain"
+      },
+      "output": "Field notes that survive the field."
+    },
+    {
+      "inputs": {
+        "prompt": "A coffee subscription for offices.",
+        "tone": "playful"
+      },
+      "output": "The 3pm rescue, delivered."
+    }
+  ]
+}

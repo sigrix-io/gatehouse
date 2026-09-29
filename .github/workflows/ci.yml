@@ -1,0 +1,68 @@
+# `npm ci`, never `npm install`: see CONTRIBUTING. The lockfile is the whole
+# reason the install works on npm 10, so a workflow that regenerated the tree
+# would be testing a different one from the contributors.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # vitest 5 and jsdom 30 need Node 22 or newer.
+        node-version: ["22", "24"]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  # The package is five files a consumer either installs or copies. This proves
+  # the tarball carries them: `files` in package.json is an allow-list, so a new
+  # source file is absent from a publish until it is named there, and the
+  # failure is a consumer's blank page, not ours.
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: The tarball carries every shipped file, and no tests
+        run: |
+          npm pack --silent > /dev/null
+          tar -tzf sigrix-io-gatehouse-*.tgz | sed 's|^package/||' | sort > "$RUNNER_TEMP/packed.txt"
+          echo "--- packed ---"; cat "$RUNNER_TEMP/packed.txt"
+          for f in src/* package.json README.md LICENSE NOTICE; do
+            grep -qx "$f" "$RUNNER_TEMP/packed.txt" || { echo "MISSING from the tarball: $f"; exit 1; }
+          done
+          if grep -q '^tests/' "$RUNNER_TEMP/packed.txt"; then echo "tests should not ship"; exit 1; fi
+
+  # One check to require on main, so adding a job above does not mean editing a
+  # branch protection rule to match.
+  ci-passed:
+    if: always()
+    needs: [test, pack]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Every job succeeded
+        run: |
+          echo '${{ toJSON(needs) }}'
+          [ "${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}" = "false" ]

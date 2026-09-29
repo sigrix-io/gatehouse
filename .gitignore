@@ -1,0 +1,9 @@
+# Installed by `npm ci`. The lockfile is committed and it is not.
+node_modules/
+
+# vitest and editors.
+.vitest/
+coverage/
+
+# What `npm pack` writes when the tarball is checked by hand.
+*.tgz
