@@ -14,6 +14,13 @@ follows [VERSIONING.md](VERSIONING.md), which is worth reading before pinning.
   security@sigrix.io, and a question about the specification to
   `sigrix-io/postern`. Nothing in the package changes.
 
+### Changed
+
+- Dependabot opens one pull request per ecosystem, npm and GitHub Actions,
+  instead of one per dependency. The branch ruleset only merges a pull request
+  that is up to date with `main`, so each separate update merged put every
+  other one behind. Nothing in the package changes.
+
 ## [0.1.1] — 2026-09-29
 
 ### Changed
