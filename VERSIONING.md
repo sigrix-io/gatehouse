@@ -59,26 +59,41 @@ clients to ignore what they do not recognise are what make it not one.
 
 A release is a tag. `release.yml` publishes to npm on any `v*` tag pushed to
 this repository, through npm's trusted publishing: npm trusts this repository's
-workflow rather than a token, so no token is stored anywhere and the package
-carries a provenance statement saying which commit built it.
+workflow rather than a token, so no token is stored anywhere, and a version it
+publishes from a public repository carries a provenance statement saying which
+commit built it.
 
-Three things must be in place, and none of them fails loudly while missing:
+Three things must be in place, and whichever is missing, the publish fails with
+an error that does not say which:
 
 1. **The package exists on npm.** A trusted publisher is added in a package's
-   own settings, so the first version, 0.1.0, is published by a person from a
-   clean checkout of its tag: `npm ci && npm test && npm publish` (the scope's
-   `publishConfig` makes it public).
+   own settings, so the first version is published by a person (below).
 2. **A trusted publisher** on npmjs.com, under the package's settings: GitHub
    Actions, `sigrix-io/gatehouse`, workflow `release.yml`, environment `npm`,
    allowed to run `npm publish`.
 3. **An environment named `npm`** in this repository's settings. The
    publisher names it, so a workflow running outside it is refused.
 
-Then every later release is:
+Then every release is:
 
 ```sh
 git tag v0.1.1 && git push origin v0.1.1
 ```
 
-npm writes provenance only for a public repository, which is one reason the
-first release waits until this one is public.
+### The first release
+
+0.1.0 is published by hand, from a clean checkout, before its tag is pushed:
+
+```sh
+git tag v0.1.0
+npm publish    # publishConfig makes the scoped package public; npm asks for 2FA
+```
+
+CI has already run the suite on that commit, and `npm ci && npm test` repeats it
+on Node 22 or newer. Then the trusted publisher and the environment, and only
+then `git push origin v0.1.0`: the run it starts finds 0.1.0 on npm and
+publishes nothing, so the tag is a record rather than a failed release. The
+first version the workflow publishes is the one after.
+
+A version published by hand carries no provenance statement, so 0.1.0 has none;
+npm writes one only for a version a public repository's workflow published.

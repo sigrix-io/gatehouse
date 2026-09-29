@@ -5,7 +5,7 @@ follows [VERSIONING.md](VERSIONING.md), which is worth reading before pinning.
 
 ## [Unreleased]
 
-## [0.1.0]
+## [0.1.0] — 2026-09-29
 
 First release. The code is not new: it is the run renderer of the Sigrix
 platform, where it draws the buyer's run page, the seller's preview and the

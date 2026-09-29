@@ -5,6 +5,9 @@ name: Release
 # A trusted publisher is added in a package's own settings on npmjs.com, so the
 # first version is published by a person and this workflow publishes the ones
 # after it. VERSIONING.md § Releasing has all three things that must be in place.
+#
+# That first version's tag is pushed once the version is on npm, so a tag whose
+# version is already there is a run with nothing to publish, not a failure.
 
 on:
   push:
@@ -35,4 +38,14 @@ jobs:
       - run: npm install -g npm@11
       - run: npm ci
       - run: npm test
-      - run: npm publish
+      # Only an answer equal to the version skips: a lookup that fails for any
+      # other reason publishes, and npm refuses a version it already has.
+      - name: Publish, unless this version is already on npm
+        run: |
+          name=$(node -p "require('./package.json').name")
+          version=$(node -p "require('./package.json').version")
+          if [ "$(npm view "$name@$version" version 2>/dev/null)" = "$version" ]; then
+            echo "::notice::$name@$version is already on npm, so this run publishes nothing."
+          else
+            npm publish
+          fi
