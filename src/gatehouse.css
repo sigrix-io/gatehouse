@@ -36,6 +36,11 @@
 @media (max-width: 960px) {
   .run-shell { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "rail" "form" "controls" "output"; }
 }
+/* Stated here rather than left to a host's reset, which a page linking only
+ * this file does not have. A browser draws `select` border-box and `input` and
+ * `textarea` content-box, so without it a full-width field spills past its card
+ * by its own padding and border while the select beside it fits. */
+.run-shell, .run-shell *, .run-shell *::before, .run-shell *::after { box-sizing: border-box; }
 
 /* ---------- header ---------- */
 .run-header { grid-area: head; margin-bottom: 18px; }
@@ -91,7 +96,9 @@
 .run-credential.is-missing .run-credential-tick { color: var(--run-danger); }
 .run-credential-purpose { font-size: 11.5px; color: var(--run-text-3); }
 .run-credential-where { font-size: 11.5px; color: var(--run-text-2); margin: 0 0 10px; }
-.run-credential-link { font-size: 11.5px; margin-left: 6px; }
+/* The words around it, underlined. Left to the browser, a link is its own
+ * blue, which reads 1.9:1 on the dark surface. */
+.run-credential-link { font-size: 11.5px; margin-left: 6px; color: inherit; }
 
 .run-tools { margin: 0 0 8px; }
 .run-tool-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 5px; }

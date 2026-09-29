@@ -66,3 +66,101 @@ suite('the stylesheet', () => {
     expect(missing).toEqual([]);
   });
 });
+
+/* What a host's own reset usually supplies, and a page that links only this
+ * file does not have. 0.1.0 left both to the host, so a page with no other
+ * stylesheet drew its full-width fields past their card and its link in the
+ * browser's blue, 1.9:1 on the dark surface. The page is mounted from real
+ * describe documents with nothing but this stylesheet on it. */
+const FIXTURES = path.resolve(HERE, 'fixtures/postern_describe');
+const MODULES = ['postern_client.js', 'run_view_model.js', 'refusal_copy.js', 'run_renderer.js'];
+const PAGES = [
+  ['conformance_fake.describe.json', 'conformance_fake.status.json'],
+  ['pipeline_crew.describe.json', 'pipeline_crew.status.json'],
+];
+
+function fixture(name) {
+  return JSON.parse(fs.readFileSync(path.join(FIXTURES, name), 'utf8'));
+}
+
+async function mountAlone([describeName, statusName]) {
+  document.head.innerHTML = '';
+  document.body.innerHTML = '';
+  delete window.Gatehouse;
+  const style = document.createElement('style');
+  style.textContent = STYLESHEET;
+  document.head.appendChild(style);
+  MODULES.forEach(name => {
+    // eslint-disable-next-line no-new-func
+    new Function(fs.readFileSync(path.join(SRC, name), 'utf8')).call(window);
+  });
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const client = {
+    describe: () => Promise.resolve(fixture(describeName)),
+    status: () => Promise.resolve(fixture(statusName)),
+    run: () => Promise.resolve({ run_id: 'r-1', output: { type: 'text', value: 'done' } }),
+    stream: () => Promise.resolve(),
+  };
+  await new window.Gatehouse.RunRenderer(container, client).load();
+  return { container, sheet: style.sheet };
+}
+
+/* jsdom parses the sheet but does not cascade `box-sizing`, so the question is
+ * asked of the rules themselves: does one that matches this element say so. */
+function sizedBorderBox(element, sheet) {
+  return [...sheet.cssRules].some(rule =>
+    rule.selectorText &&
+    rule.style.getPropertyValue('box-sizing') === 'border-box' &&
+    rule.selectorText.split(',').map(part => part.trim()).filter(part => !part.includes('::'))
+      .some(part => element.matches(part))
+  );
+}
+
+function anchorClasses() {
+  const source = fs.readFileSync(path.join(SRC, 'run_renderer.js'), 'utf8');
+  return [...source.matchAll(/el\(\s*'a'\s*,\s*'([a-z][a-z0-9-]*)'/g)].map(match => match[1]);
+}
+
+suite('the stylesheet, on a page with no other', () => {
+  it('sizes every form control the renderer draws border-box', async () => {
+    const tags = new Set();
+    for (const page of PAGES) {
+      const { container, sheet } = await mountAlone(page);
+      expect(sheet.cssRules.length).toBeGreaterThan(50);
+      const controls = [...container.querySelectorAll('input, textarea, select')];
+      controls.forEach(control => tags.add(control.tagName.toLowerCase()));
+      const unsized = controls.filter(control => !sizedBorderBox(control, sheet))
+        .map(control => `${control.tagName.toLowerCase()}.${control.className}`);
+      expect(unsized, page[0]).toEqual([]);
+    }
+    // The two a browser draws content-box are among them, or this proves nothing.
+    expect([...tags].sort()).toEqual(expect.arrayContaining(['input', 'textarea']));
+  });
+
+  it('leaves no link on the browser\'s own colour', async () => {
+    const { container } = await mountAlone(PAGES[1]);
+    const bare = document.createElement('a');
+    bare.href = '#';
+    document.body.appendChild(bare);
+    const browserColour = getComputedStyle(bare).color;
+    expect(browserColour).toBeTruthy();
+
+    // The crew's missing key draws a real one; the rest are placed in the shell.
+    expect(container.querySelector('a.run-credential-link')).not.toBeNull();
+    const classes = anchorClasses();
+    expect(classes).toEqual(expect.arrayContaining(['run-credential-link', 'run-download']));
+    const shell = container.querySelector('.run-shell');
+    const placed = classes.map(name => {
+      const link = document.createElement('a');
+      link.className = name;
+      link.href = '#';
+      shell.appendChild(link);
+      return link;
+    });
+    const onBrowserColour = [...container.querySelectorAll('a'), ...placed]
+      .filter(link => getComputedStyle(link).color === browserColour)
+      .map(link => link.className);
+    expect(onBrowserColour).toEqual([]);
+  });
+});

@@ -5,12 +5,28 @@ follows [VERSIONING.md](VERSIONING.md), which is worth reading before pinning.
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-09-29
+
 ### Changed
 
 - Every GitHub Action the workflows run is pinned to a commit, with its release
   named beside it, and a test fails if one stops being. The release refuses to
   run in a fork and is never cancelled mid-publish. Nothing in the package
   changes.
+
+### Fixed
+
+Two rules 0.1.0 left to the host page's own stylesheet, so it looked right
+inside the host it came from and wrong on a page that links `gatehouse.css`
+alone.
+
+- Fields stay inside their card. Everything within `.run-shell` is now sized
+  `border-box`; a browser draws `input` and `textarea` `content-box`, so the
+  text box and the text inputs spilled 24px past the card while the select
+  beside them fitted.
+- The link beside a missing credential takes the colour of the words around
+  it, underlined, instead of the browser's link blue, which read 1.9:1 on the
+  dark surface.
 
 ## [0.1.0] — 2026-09-29
 

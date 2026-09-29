@@ -1,6 +1,6 @@
 {
   "name": "@sigrix-io/gatehouse",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A browser client for Postern: draws a run page from a describe document and connects it to the four verbs. No build step and no dependencies.",
   "license": "Apache-2.0",
   "author": "Sigrix",
