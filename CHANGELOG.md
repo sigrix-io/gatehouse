@@ -5,6 +5,13 @@ follows [VERSIONING.md](VERSIONING.md), which is worth reading before pinning.
 
 ## [Unreleased]
 
+### Changed
+
+- Every GitHub Action the workflows run is pinned to a commit, with its release
+  named beside it, and a test fails if one stops being. The release refuses to
+  run in a fork and is never cancelled mid-publish. Nothing in the package
+  changes.
+
 ## [0.1.0] — 2026-09-29
 
 First release. The code is not new: it is the run renderer of the Sigrix
