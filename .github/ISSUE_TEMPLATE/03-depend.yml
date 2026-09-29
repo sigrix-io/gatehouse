@@ -1,0 +1,42 @@
+name: I depend on this
+description: Not a defect. Tell us you are building on 0.x so a breaking change reaches you before it lands.
+labels: ["dependent"]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        [VERSIONING.md](https://github.com/sigrix-io/gatehouse/blob/main/VERSIONING.md)
+        says nothing is stable before 1.0, and asks anyone building on 0.x to
+        say so. This form is how: an announced breaking change and a surprising
+        one differ by whether we knew somebody was there.
+  - type: input
+    id: version
+    attributes:
+      label: Which version are you pinned to?
+      placeholder: '"@sigrix-io/gatehouse": "~0.1.0"'
+    validations:
+      required: true
+  - type: checkboxes
+    id: surface
+    attributes:
+      label: Which parts do you use?
+      description: This is what tells us which change would cost you something.
+      options:
+        - label: "`PosternClient` on its own, from code of my own"
+        - label: "`RunRenderer`, drawing the whole page"
+        - label: "A composition (`ui.json`) of my own"
+        - label: "The CSS class names, extended or overridden by my stylesheet"
+        - label: "The rendered DOM structure, asserted on by my tests"
+        - label: "`window.SigrixRun`, the deprecated alias"
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Anything else worth knowing
+      description: >-
+        What you are building, how you load the files (served from `src/`, or
+        from `node_modules`), and whether a renamed class would break you or
+        merely show up in a diff. No obligation to name your project.
+    validations:
+      required: false
