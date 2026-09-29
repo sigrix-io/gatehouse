@@ -1,0 +1,24 @@
+# The three forms alongside this file are the three kinds of report this
+# repository treats differently: the client disagreeing with the specification
+# or drawing the page wrong, a change, and a dependent saying so. A blank issue
+# would let that sorting be skipped.
+blank_issues_enabled: false
+
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/sigrix-io/gatehouse/security/policy
+    about: >-
+      Do not open a public issue. Email security@sigrix.io, acknowledged within
+      three working days. Agent output reaching the page as markup, a request
+      to a second origin, or a run nobody asked for are all in scope.
+  - name: Raise a code of conduct concern
+    url: https://github.com/sigrix-io/gatehouse/blob/main/CODE_OF_CONDUCT.md
+    about: >-
+      Email conduct@sigrix.io. A different address and a different queue from
+      security reports; neither is a fallback for the other.
+  - name: A question about the Postern specification
+    url: https://github.com/sigrix-io/postern/issues
+    about: >-
+      What a verb, an event or an input means is the specification's to say.
+      If the document is unclear or wrong, ask there; if this client disagrees
+      with the document, file a defect here.

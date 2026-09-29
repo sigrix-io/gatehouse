@@ -1,0 +1,43 @@
+name: Change
+description: You want the client to do something it does not.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Gatehouse speaks [Postern](https://github.com/sigrix-io/postern)'s four
+        verbs and draws one page, with no build step, no runtime dependency and
+        no second origin. Two rules are not negotiable: no `innerHTML`, and one
+        origin. How a verb, an event or an input behaves is the specification's
+        to decide, and a change to it names the section it follows. See
+        [CONTRIBUTING.md](https://github.com/sigrix-io/gatehouse/blob/main/CONTRIBUTING.md).
+  - type: textarea
+    id: problem
+    attributes:
+      label: What goes wrong today
+      description: >-
+        Describe the situation, not the feature: the page you were building,
+        what the client did, and what that cost you.
+    validations:
+      required: true
+  - type: textarea
+    id: workaround
+    attributes:
+      label: What you do instead right now
+      description: >-
+        A patched copy, a wrapper around the renderer, CSS on top. What every
+        host would otherwise write for itself is the strongest case for it
+        living here.
+    validations:
+      required: false
+  - type: dropdown
+    id: specified
+    attributes:
+      label: Does the specification already define this?
+      options:
+        - Yes, and the client should follow it
+        - No, it would need the specification first
+        - It is about how the page is drawn, not about a verb
+        - Not sure
+    validations:
+      required: true

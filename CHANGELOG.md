@@ -5,6 +5,15 @@ follows [VERSIONING.md](VERSIONING.md), which is worth reading before pinning.
 
 ## [Unreleased]
 
+### Added
+
+- `CODE_OF_CONDUCT.md`, issue forms and a pull request template, the set the
+  other open repositories carry. Blank issues are off: a report is a defect, a
+  change, or a dependent saying so, which is the issue `VERSIONING.md` asks
+  anyone building on 0.x to open. A security report goes to
+  security@sigrix.io, and a question about the specification to
+  `sigrix-io/postern`. Nothing in the package changes.
+
 ## [0.1.1] — 2026-09-29
 
 ### Changed

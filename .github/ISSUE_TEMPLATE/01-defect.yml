@@ -1,0 +1,41 @@
+name: Defect
+description: The page is drawn wrong, or a verb, an event or an input is handled differently from the specification.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        **Never paste a credential.** Postern carries none, but a proxy in
+        front of a runner may: redact any header you pass through
+        `PosternClient`'s `headers` option (a CSRF token, say) before you attach
+        anything. If agent output reached the page as markup, or a request went
+        to a second origin, that is a vulnerability: email security@sigrix.io
+        instead of filing it here.
+  - type: textarea
+    id: documents
+    attributes:
+      label: The documents or bytes that trigger it
+      description: >-
+        The `describe` and `status` documents, the composition (`ui.json`) if
+        you passed one, and for a run, the stream's events in the order they
+        arrived. A document is a report that can become a test in one step.
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected, and what the page did
+      description: >-
+        Where the specification says otherwise, name the section (`§4.3`) and
+        quote the sentence. A screenshot helps with anything drawn wrong.
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: gatehouse, the browser, and the runner it talked to.
+      placeholder: "gatehouse 0.1.1, Firefox 131, sigrix-runtime 0.1.0"
+    validations:
+      required: true
