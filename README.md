@@ -1,5 +1,9 @@
 # Gatehouse
 
+[![npm](https://img.shields.io/npm/v/@sigrix-io/gatehouse)](https://www.npmjs.com/package/@sigrix-io/gatehouse)
+[![CI](https://github.com/sigrix-io/gatehouse/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/sigrix-io/gatehouse/actions/workflows/ci.yml)
+[![Licence](https://img.shields.io/github/license/sigrix-io/gatehouse)](https://github.com/sigrix-io/gatehouse/blob/main/LICENSE)
+
 A browser client for [Postern](https://github.com/sigrix-io/postern). Given a runner's `describe` and `status` documents, Gatehouse draws a run page (a form, a run button, the steps as they happen, the result and its usage) and connects it to Postern's four verbs over `fetch`. It holds nothing else.
 
 Four scripts and a stylesheet. No build step, no runtime dependency, no second origin.
@@ -8,7 +12,11 @@ Four scripts and a stylesheet. No build step, no runtime dependency, no second o
 
 ## Use it
 
-Serve the five files from `src/` (or install `@sigrix-io/gatehouse` and serve them from `node_modules`), and load the scripts in this order:
+```sh
+npm install @sigrix-io/gatehouse
+```
+
+Serve the five files it installs in `node_modules/@sigrix-io/gatehouse/src/` (or copy them from this repository's `src/`; there is nothing to build), and load the scripts in this order:
 
 ```html
 <link rel="stylesheet" href="gatehouse.css">
@@ -81,6 +89,17 @@ The form shows only the chosen option's inputs; a chosen option's `required` add
 ## Styling
 
 `gatehouse.css` styles every class the renderer draws, and `tests/stylesheet.test.js` fails when one has no rule. Colours are custom properties on `.run-shell`: each `--run-*` reads a host's `--sx-*` token when the page defines one and falls back to its own value, so the file works alone and a host can theme it. Dark values apply under `[data-theme="dark"]` on any ancestor.
+
+## Where it fits
+
+Gatehouse is one of the open-source projects [Sigrix](https://sigrix.io) publishes, and the page between a person and a runner. On Sigrix it draws the buyer's run page and the seller's preview; elsewhere it meets:
+
+- **[Postern](https://github.com/sigrix-io/postern)**, the protocol whose four verbs it calls. Its [§2.3](https://github.com/sigrix-io/postern/blob/main/SPEC.md#23-browser-clients) says what a runner owes a browser client, and why the default is to refuse.
+- **[sigrix-runtime](https://github.com/sigrix-io/sigrix-runtime)** (`pip install sigrix-runtime`), a runner to point it at: the one inside every bundle Sigrix delivers, which can also serve an MCP server's tools as one agent. Start it with `--allow-origin` set to the page's origin.
+- **[postern-conformance](https://pypi.org/project/postern-conformance/)** (`pip install postern-conformance`), which reports the level a runner really meets before you draw a page for it.
+- **[Bailey](https://github.com/sigrix-io/bailey)**, the open-source assistant: the app planned for its 0.1 draws a solution's apps with Gatehouse.
+
+Every project Sigrix publishes, and a map of how they connect: [sigrix.io/open-source](https://sigrix.io/open-source).
 
 ## Tests
 

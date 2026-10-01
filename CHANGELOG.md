@@ -16,6 +16,12 @@ follows [VERSIONING.md](VERSIONING.md), which is worth reading before pinning.
 
 ### Changed
 
+- The README opens with badges for the npm release, CI and the licence, and
+  *Use it* starts with `npm install @sigrix-io/gatehouse` rather than
+  mentioning the package in passing. A new *Where it fits* section names the
+  projects a page meets: Postern, a runner to point it at, the conformance
+  checker and Bailey. The README is the npm page too, so the next release
+  carries it there. Nothing in the package changes.
 - Dependabot opens one pull request per ecosystem, npm and GitHub Actions,
   instead of one per dependency. The branch ruleset only merges a pull request
   that is up to date with `main`, so each separate update merged put every
