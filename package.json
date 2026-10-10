@@ -28,6 +28,7 @@
     "./run_view_model.js": "./src/run_view_model.js",
     "./refusal_copy.js": "./src/refusal_copy.js",
     "./run_renderer.js": "./src/run_renderer.js",
+    "./host_blocks.js": "./src/host_blocks.js",
     "./gatehouse.css": "./src/gatehouse.css",
     "./package.json": "./package.json"
   },

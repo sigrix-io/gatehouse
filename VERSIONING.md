@@ -40,8 +40,20 @@ itself, so it is announced here rather than discovered.
 - The class names in `gatehouse.css`.
 - The constructor signatures of `PosternClient` and `RunRenderer`, and the
   shape of `RunRenderer`'s options — including `options.composition`.
+- The host blocks' constructors (`AppCard`, `AppList`, `RunHistory`,
+  `UsageSummary`), their options, and the three documents they read, at
+  `"v": 1`. Renaming or removing a member, or changing what one means, is a
+  new `v`, which a release reads before any host sends it; a new member is
+  not, because the blocks ignore what they do not read.
 
-Anything reached only by reading the source is not.
+Anything reached only by reading the source is not, and that includes the ids
+a `RunRenderer` writes: find a field by its `name` inside the container.
+
+## Several renderers on one page
+
+Since 0.2 a `RunRenderer` scopes its ids to itself, so a page may hold as many
+as it likes. A host that looked a field up by `run-field-<key>` finds it by
+`name` instead; the change is in `CHANGELOG.md` with that migration.
 
 ## What tracks Postern rather than us
 

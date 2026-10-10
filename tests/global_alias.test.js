@@ -13,7 +13,7 @@ import { describe as suite, it, expect, beforeEach } from 'vitest';
 
 const HERE = path.dirname(new URL(import.meta.url).pathname);
 const SRC = path.resolve(HERE, '../src');
-const MODULES = ['postern_client.js', 'run_view_model.js', 'refusal_copy.js', 'run_renderer.js'];
+const MODULES = ['postern_client.js', 'run_view_model.js', 'refusal_copy.js', 'run_renderer.js', 'host_blocks.js'];
 
 function load(names) {
   (names || MODULES).forEach(name => {
@@ -43,8 +43,9 @@ suite('the global surface', () => {
   it('carries every member the host constructs by name', () => {
     load();
     // Exactly what src/templates/*.html reach for in the host, plus the two
-    // error types its own catch blocks name.
-    ['PosternClient', 'RunRenderer', 'PosternRefusal', 'PosternUnreachable']
+    // error types its own catch blocks name, and the host blocks a dashboard
+    // constructs.
+    ['PosternClient', 'RunRenderer', 'PosternRefusal', 'PosternUnreachable', 'AppCard', 'AppList', 'RunHistory', 'UsageSummary']
       .forEach(member => expect(window.SigrixRun[member]).toBeTypeOf('function'));
   });
 

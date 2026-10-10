@@ -148,7 +148,7 @@ suite('a widget hint changes the control, never the contract', () => {
       statusDoc,
       composed({ inputs: [{ key: 'notes', widget: 'box' }] })
     );
-    expect(container.querySelector('#run-field-notes').tagName).toBe('TEXTAREA');
+    expect(container.querySelector('[name="notes"]').tagName).toBe('TEXTAREA');
   });
 
   it('turns the reserved brief into one line on request', async () => {
@@ -156,14 +156,14 @@ suite('a widget hint changes the control, never the contract', () => {
      * — is exactly what this document exists to replace, so the override has
      * to work in both directions. */
     const bare = await mount(describeDoc(), statusDoc, null);
-    expect(bare.container.querySelector('#run-field-prompt').tagName).toBe('TEXTAREA');
+    expect(bare.container.querySelector('[name="prompt"]').tagName).toBe('TEXTAREA');
 
     const { container } = await mount(
       describeDoc(),
       statusDoc,
       composed({ inputs: [{ key: 'prompt', widget: 'line' }] })
     );
-    expect(container.querySelector('#run-field-prompt').tagName).toBe('INPUT');
+    expect(container.querySelector('[name="prompt"]').tagName).toBe('INPUT');
   });
 
   it('refuses to make a select a number box, and says so', async () => {
@@ -172,7 +172,7 @@ suite('a widget hint changes the control, never the contract', () => {
       statusDoc,
       composed({ inputs: [{ key: 'tone', widget: 'number' }] })
     );
-    expect(container.querySelector('#run-field-tone').tagName).toBe('SELECT');
+    expect(container.querySelector('[name="tone"]').tagName).toBe('SELECT');
     expect(container.textContent).toContain('"number" control');
   });
 
@@ -182,7 +182,7 @@ suite('a widget hint changes the control, never the contract', () => {
       statusDoc,
       composed({ inputs: [{ key: 'count', widget: 'choice' }] })
     );
-    const control = container.querySelector('#run-field-count');
+    const control = container.querySelector('[name="count"]');
     expect(control.tagName).toBe('INPUT');
     expect(control.type).toBe('number');
   });
@@ -198,7 +198,7 @@ suite('a widget hint changes the control, never the contract', () => {
     const help = container.querySelector('.run-field-help');
     expect(help.textContent).toBe('<b>not markup</b>');
     expect(help.querySelector('b')).toBeNull();
-    expect(container.querySelector('#run-field-notes').placeholder).toBe('<i>nor this</i>');
+    expect(container.querySelector('[name="notes"]').placeholder).toBe('<i>nor this</i>');
   });
 });
 
@@ -303,7 +303,7 @@ suite('a document this client does not know', () => {
     });
 
     expect(container.querySelector('.run-go').textContent).toBe('Applies anyway');
-    expect(container.querySelector('#run-field-prompt').tagName).toBe('INPUT');
+    expect(container.querySelector('[name="prompt"]').tagName).toBe('INPUT');
   });
 
   it('drops a palette value it does not have, whoever wrote the document', async () => {
@@ -315,7 +315,7 @@ suite('a document this client does not know', () => {
 
     expect(container.querySelector('.run-go').textContent).toBe('Go');
     // The default guess survives: an unknown widget is not a widget.
-    expect(container.querySelector('#run-field-prompt').tagName).toBe('TEXTAREA');
+    expect(container.querySelector('[name="prompt"]').tagName).toBe('TEXTAREA');
     // `html` is not an output mode, so the result stays plain text.
     expect(container.querySelector('.run-result-rendered').children.length).toBe(0);
   });

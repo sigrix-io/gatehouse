@@ -1,0 +1,21 @@
+{
+  "v": 1,
+  "period": {"label": "September 2026", "start": "2026-09-01", "end": "2026-09-30"},
+  "runs": 128,
+  "runs_done": 124,
+  "input_tokens": 1391600,
+  "output_tokens": 396700,
+  "cost_estimate": 8.46,
+  "currency": "USD",
+  "caps": {"runs_per_day": 10, "runs_used": 3, "spend_per_period": 25.0},
+  "by_app": [
+    {"app_id": "a-property-copy", "app_name": "Property copy", "runs": 71, "input_tokens": 852000, "output_tokens": 248500, "cost_estimate": 4.62},
+    {"app_id": "a-lead-digest", "app_name": "Lead digest", "runs": 57, "input_tokens": 539600, "output_tokens": 148200, "cost_estimate": 3.84}
+  ],
+  "by_day": [
+    {"date": "2026-09-01", "runs": 5},
+    {"date": "2026-09-02", "runs": 0},
+    {"date": "2026-09-03", "runs": 8},
+    {"date": "2026-09-04", "runs": 2}
+  ]
+}

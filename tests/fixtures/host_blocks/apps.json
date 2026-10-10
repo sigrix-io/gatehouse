@@ -1,0 +1,40 @@
+[
+  {
+    "v": 1,
+    "app_id": "a-property-copy",
+    "name": "Property copy",
+    "summary": "Writes a property's description from the agent's notes.",
+    "by": "fernhill",
+    "state": "ready",
+    "missing_keys": [],
+    "access_ends_at": null,
+    "last_run_at": "2026-09-30T15:47:12Z",
+    "run_url": "/apps/a-property-copy/run"
+  },
+  {
+    "v": 1,
+    "app_id": "a-lead-digest",
+    "name": "Lead digest",
+    "summary": "Sorts the week's enquiries by how soon each wants to move.",
+    "by": "northgate",
+    "state": "needs_key",
+    "missing_keys": [
+      {"env": "CRM_API_KEY", "purpose": "Reads your contacts", "signup_url": "https://crm.example.com/keys"}
+    ],
+    "access_ends_at": "2027-10-01T00:00:00Z",
+    "last_run_at": null,
+    "run_url": "/apps/a-lead-digest/run"
+  },
+  {
+    "v": 1,
+    "app_id": "a-viewing-notes",
+    "name": "Viewing notes",
+    "summary": "Turns a viewing's voice memo into a follow-up email.",
+    "by": "fernhill",
+    "state": "ended",
+    "missing_keys": [],
+    "access_ends_at": "2026-08-31T00:00:00Z",
+    "last_run_at": "2026-08-30T09:12:00Z",
+    "run_url": null
+  }
+]

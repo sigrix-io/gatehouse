@@ -66,9 +66,11 @@ async function mount(documentOverride, choice, composition) {
   return { NS, container, renderer, sent };
 }
 
-/* Keys carry a dot, which a CSS selector reads as a class: look them up by id. */
+/* Keys carry a dot, which a bare CSS selector reads as a class, so they are
+ * matched as a quoted attribute value. By name rather than by id: the id is the
+ * renderer's own, scoped so that two renderers on one page cannot share one. */
 function field(key) {
-  const control = document.getElementById('run-field-' + key);
+  const control = document.querySelector('.run-field-control[name="' + key + '"]');
   return { control, wrap: control ? control.closest('.run-field') : null };
 }
 

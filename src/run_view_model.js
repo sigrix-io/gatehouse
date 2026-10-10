@@ -82,6 +82,24 @@
     return value === null || value === undefined ? '' : String(value);
   }
 
+  /* A link the page may draw: an absolute `http:` or `https:` address, and
+   * nothing else. `signup_url` is a runner author's prose, and the schema's
+   * `"format": "uri"` is satisfied by a `javascript:` URI as readily as by a
+   * web page; an anchor is the one element through which a string becomes
+   * something a click runs. Anything else draws no link. `host_blocks.js`
+   * applies the same rule to the same member, and one case table holds both. */
+  function webLink(value) {
+    const candidate = text(value).trim();
+    if (!candidate) return '';
+    let parsed;
+    try {
+      parsed = new URL(candidate);
+    } catch (err) {
+      return '';
+    }
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.href : '';
+  }
+
   /* SPEC 4.1.3 and 7: a `describe` carrying a credential *value* is
    * nonconformant, and a client meeting one SHOULD refuse to proceed. This one
    * refuses — returning the reason rather than throwing, so the page can say
@@ -432,7 +450,7 @@
       return {
         env,
         purpose: text(entry.purpose),
-        signupUrl: text(entry.signup_url),
+        signupUrl: webLink(entry.signup_url),
         satisfied: missing.indexOf(env) === -1,
       };
     });
@@ -612,6 +630,7 @@
       limitsView,
       updateNotice,
       credentialLeak,
+      webLink,
     },
   });
 
