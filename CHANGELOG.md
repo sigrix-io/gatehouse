@@ -5,6 +5,8 @@ follows [VERSIONING.md](VERSIONING.md), which is worth reading before pinning.
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-10-10
+
 ### Added
 
 - Host blocks, in a fifth script, `host_blocks.js`: `AppCard`, `AppList`,
