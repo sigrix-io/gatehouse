@@ -31,6 +31,13 @@
     return 'k-' + Date.now() + '-' + Math.random().toString(16).slice(2);
   }
 
+  /* How many renderers this copy of the file has made. An id is unique to the
+   * document, not to the container it is drawn in, so two renderers on one
+   * page that both wrote `run-field-prompt` would bind each `<label>` to the
+   * first page's field. Each renderer writes its ids under a scope of its own
+   * instead, numbered in the order they were made. */
+  let renderersMade = 0;
+
   class RunRenderer {
     /* `container` is where the page is drawn; `client` is any object with the
      * four verbs, so a caller may pass its own. `options.composition` is the
@@ -64,6 +71,15 @@
       this.idempotencyKey = '';
       this.onRunStateChange = settings.onRunStateChange || function () {};
       this.nodes = {};
+      renderersMade += 1;
+      this.idScope = 'run-' + renderersMade;
+    }
+
+    /* An id inside this renderer's scope. A host looking for a field finds it
+     * by its `name`, which is the input's key, inside the container it handed
+     * in; the id is this renderer's own business. */
+    scopedId(part) {
+      return this.idScope + '-' + part;
     }
 
     async load() {
@@ -197,7 +213,7 @@
       this.nodes.choiceAbout = null;
       vm.fields.forEach(function (field) {
         const wrap = el('div', 'run-field');
-        const id = 'run-field-' + field.key;
+        const id = self.scopedId('field-' + field.key);
         const label = el('label', 'run-field-label', field.label + (field.required ? ' *' : ''));
         label.htmlFor = id;
         wrap.appendChild(label);
@@ -316,11 +332,11 @@
         const gate = el('div', 'run-write-gate');
         const box = el('input', 'run-write-check');
         box.type = 'checkbox';
-        box.id = 'run-write-confirm';
+        box.id = this.scopedId('write-confirm');
         const label = el('label', 'run-write-label',
           'This agent can ' + vm.capabilities.writeTools.join(', ') +
           '. Runs cost money and write outside this page; stopping a run or closing the tab cancels it but does not undo it.');
-        label.htmlFor = 'run-write-confirm';
+        label.htmlFor = box.id;
         box.addEventListener('change', function () {
           self.writeToolsAccepted = box.checked;
           self.syncRunEnabled();

@@ -350,3 +350,65 @@ suite('a nonconformant describe stops the page', () => {
     expect(container.querySelector('.run-refuse')).toBeTruthy();
   });
 });
+
+suite('several renderers on one page', () => {
+  /* Two apps side by side is what a dashboard draws. An id is unique to the
+   * document, not to the container, and a `<label>` binds to the first element
+   * carrying its `for`: with ids shared, the second page's labels would focus
+   * and tick the first page's controls. The same document twice is the worst
+   * case, since every key collides. */
+  async function mountBeside(documents) {
+    const NS = loadRenderer();
+    const pages = [];
+    for (const doc of documents) {
+      const container = document.createElement('div');
+      document.body.appendChild(container);
+      const renderer = new NS.RunRenderer(container, stubClient(doc.describe(), doc.status()));
+      await renderer.load();
+      pages.push({ container, renderer });
+    }
+    return pages;
+  }
+
+  const fake = DOCUMENTS['the conformance fake'];
+  const crew = DOCUMENTS['a real pipeline crew'];
+
+  it('gives no two elements on the page the same id', async () => {
+    await mountBeside([fake, fake, crew, crew]);
+    const ids = [...document.querySelectorAll('[id]')].map(node => node.id);
+    expect(ids.length).toBeGreaterThan(4);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('binds every label to a control inside its own renderer', async () => {
+    const pages = await mountBeside([fake, fake, crew, crew]);
+    pages.forEach(({ container }) => {
+      const labels = [...container.querySelectorAll('label')];
+      expect(labels.length).toBeGreaterThan(0);
+      labels.forEach(label => {
+        const target = document.getElementById(label.htmlFor);
+        expect(target, label.htmlFor).not.toBeNull();
+        expect(container.contains(target), label.htmlFor).toBe(true);
+      });
+    });
+  });
+
+  it('ticks only its own confirmation', async () => {
+    const [first, second] = await mountBeside([fake, fake]);
+    second.container.querySelector('.run-write-label').click();
+    expect(second.container.querySelector('.run-write-check').checked).toBe(true);
+    expect(first.container.querySelector('.run-write-check').checked).toBe(false);
+    expect(second.container.querySelector('.run-go').disabled).toBe(false);
+    expect(first.container.querySelector('.run-go').disabled).toBe(true);
+  });
+
+  it('keeps a renderer\'s ids when it draws itself again', async () => {
+    // Scoped per renderer, not per draw: a host that redraws one keeps its
+    // labels where they were.
+    const [page] = await mountBeside([fake]);
+    const before = [...page.container.querySelectorAll('[id]')].map(node => node.id);
+    page.renderer.render();
+    const after = [...page.container.querySelectorAll('[id]')].map(node => node.id);
+    expect(after).toEqual(before);
+  });
+});

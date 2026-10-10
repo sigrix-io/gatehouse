@@ -20,7 +20,8 @@ const STYLESHEET = fs.readFileSync(path.join(SRC, 'gatehouse.css'), 'utf8');
 
 /* Built by concatenation rather than written whole, so the scan sees only their
  * stems: the entitlement tones come from the view model, and the credential
- * states and the invalid-field marker are toggled by the renderer. */
+ * states and the invalid-field marker are toggled by the renderer. The host
+ * blocks add a status's tone, a meter's share and a figure's column. */
 const DYNAMIC_CLASSES = [
   'run-entitlement--quiet',
   'run-entitlement--caution',
@@ -28,6 +29,14 @@ const DYNAMIC_CLASSES = [
   'is-satisfied',
   'is-missing',
   'is-invalid',
+  'gh-status--ok',
+  'gh-status--caution',
+  'gh-status--blocked',
+  'gh-status--quiet',
+  'gh-meter--clear',
+  'gh-meter--near',
+  'gh-meter--full',
+  'gh-num',
 ];
 
 function emittedClasses() {
@@ -162,5 +171,34 @@ suite('the stylesheet, on a page with no other', () => {
       .filter(link => getComputedStyle(link).color === browserColour)
       .map(link => link.className);
     expect(onBrowserColour).toEqual([]);
+  });
+});
+
+/* A status colour comes in two weights. The fill (`--run-ok`, `--run-warn`,
+ * `--run-danger`, from a host's `--sx-ok` and the rest) is for borders and
+ * bars, and is too light to be read as words on a light surface: `#DC2C50`
+ * measured 4.38:1 on `--sx-surface-2`. Words take the ink, `--run-*-text`,
+ * which reads a host's `-text` token. A missing credential's tick painted its
+ * "not set" in the fill until 0.2. */
+suite('status colours', () => {
+  const declarations = [...STYLESHEET.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/(?<![\w-])color\s*:\s*([^;}]+)/g)]
+    .map(match => match[1].trim());
+
+  it('reads the declarations it judges', () => {
+    // Every word-colour rule is among them, the ticks' included.
+    expect(declarations.length).toBeGreaterThan(20);
+    expect(declarations).toContain('var(--run-danger-text)');
+  });
+
+  it('never paints words in a status fill', () => {
+    const fills = declarations.filter(value => /var\(--run-(ok|warn|danger)\)/.test(value));
+    expect(fills).toEqual([]);
+  });
+
+  it('defines every ink it paints with, in both themes', () => {
+    ['--run-ok-text', '--run-warn-text', '--run-danger-text'].forEach(name => {
+      const defined = STYLESHEET.match(new RegExp(`${name}\\s*:`, 'g')) || [];
+      expect(defined.length, name).toBe(2);
+    });
   });
 });
