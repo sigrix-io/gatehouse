@@ -28,8 +28,10 @@ function code(name) {
 }
 
 suite('what the package ships', () => {
-  it('is the five scripts and the stylesheet', () => {
-    expect(SCRIPTS).toEqual(['host_blocks.js', 'postern_client.js', 'refusal_copy.js', 'run_renderer.js', 'run_view_model.js']);
+  it('is the six scripts and the stylesheet', () => {
+    expect(SCRIPTS).toEqual([
+      'host_blocks.js', 'playbook_contents.js', 'postern_client.js', 'refusal_copy.js', 'run_renderer.js', 'run_view_model.js',
+    ]);
     expect(fs.readdirSync(SRC).sort()).toEqual([...SCRIPTS, 'gatehouse.css'].sort());
   });
 

@@ -202,3 +202,35 @@ suite('status colours', () => {
     });
   });
 });
+
+/* A list item laid out as a flex or grid row is drawn with no number, so a
+ * playbook's files would lose their place in the order without anything
+ * saying so, and jsdom draws no numbers to notice it by. The rows stay list
+ * items, their parts in a box inside; asked of the rules, as above. */
+suite('a playbook\'s file rows', () => {
+  it('keep the number a browser gives a list item', () => {
+    document.head.innerHTML = '';
+    document.body.innerHTML = '';
+    delete window.Gatehouse;
+    const style = document.createElement('style');
+    style.textContent = STYLESHEET;
+    document.head.appendChild(style);
+    // eslint-disable-next-line no-new-func
+    new Function(fs.readFileSync(path.join(SRC, 'playbook_contents.js'), 'utf8')).call(window);
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const doc = JSON.parse(fs.readFileSync(path.resolve(HERE, 'fixtures/playbooks/month_end_close.playbook.json'), 'utf8'));
+    new window.Gatehouse.PlaybookContents(container, doc).render();
+
+    const row = container.querySelector('.gh-playbook-file');
+    expect(row.tagName).toBe('LI');
+    const displays = [...style.sheet.cssRules]
+      .filter(rule => rule.selectorText && rule.style.getPropertyValue('display'))
+      .filter(rule => rule.selectorText.split(',').map(part => part.trim()).filter(part => !part.includes('::'))
+        .some(part => row.matches(part)))
+      .map(rule => rule.style.getPropertyValue('display'));
+    expect(displays.filter(value => value !== 'list-item')).toEqual([]);
+    // The parts are laid out, in the box inside the row.
+    expect(row.firstElementChild.className).toBe('gh-playbook-file-body');
+  });
+});
