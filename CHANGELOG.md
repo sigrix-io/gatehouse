@@ -5,6 +5,8 @@ follows [VERSIONING.md](VERSIONING.md), which is worth reading before pinning.
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-10-20
+
 ### Added
 
 - A playbook block, in a sixth script, `playbook_contents.js`:
