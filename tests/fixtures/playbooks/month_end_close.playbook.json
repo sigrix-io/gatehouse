@@ -1,0 +1,40 @@
+{
+  "format_version": "0.1",
+  "name": "month-end-close-bookkeeping",
+  "title": "Month-End Close Kit, Bookkeeping Edition",
+  "order": [
+    "README.md",
+    "CHECKLIST.md",
+    "checklist.html",
+    "close-steps.md",
+    "client-emails.md",
+    "reference/categories.csv",
+    "tools/reconcile.html",
+    "LICENSE.txt",
+    "CHANGELOG.md"
+  ],
+  "files": [
+    {"path": "README.md", "role": "guide"},
+    {"path": "CHECKLIST.md", "role": "checklist"},
+    {"path": "checklist.html", "role": "checklist", "same_as": "CHECKLIST.md", "self_contained": true},
+    {"path": "close-steps.md", "role": "steps"},
+    {"path": "client-emails.md", "role": "copy"},
+    {"path": "reference/categories.csv", "role": "reference"},
+    {"path": "tools/reconcile.html", "role": "tool", "self_contained": true},
+    {"path": "LICENSE.txt", "role": "license"},
+    {"path": "CHANGELOG.md", "role": "changelog"}
+  ],
+  "slots": {
+    "setup": [
+      {"placeholder": "[FIRM NAME]", "label": "Your firm's name, as clients know it"},
+      {"placeholder": "[NAME]", "label": "Your name, as you sign your emails"},
+      {"placeholder": "[PORTAL]", "label": "The address of your client portal"}
+    ],
+    "message": [
+      {"placeholder": "[name]", "label": "The client's first name"},
+      {"placeholder": "[month]", "label": "The month being closed"},
+      {"placeholder": "[missing]", "label": "What the client still has to send"}
+    ]
+  },
+  "examples_are_fictional": true
+}

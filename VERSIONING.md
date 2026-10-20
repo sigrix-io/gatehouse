@@ -45,6 +45,10 @@ itself, so it is announced here rather than discovered.
   `"v": 1`. Renaming or removing a member, or changing what one means, is a
   new `v`, which a release reads before any host sends it; a new member is
   not, because the blocks ignore what they do not read.
+- The playbook block's constructor (`PlaybookContents`), its options, and the
+  document it reads: a Muster `playbook.json` in format 0.x. A minor version
+  of the format only adds members, which the block ignores; a new major is a
+  release of this package that reads it, before any host hands one in.
 
 Anything reached only by reading the source is not, and that includes the ids
 a `RunRenderer` writes: find a field by its `name` inside the container.

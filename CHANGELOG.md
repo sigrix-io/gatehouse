@@ -5,6 +5,24 @@ follows [VERSIONING.md](VERSIONING.md), which is worth reading before pinning.
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-10-20
+
+### Added
+
+- A playbook block, in a sixth script, `playbook_contents.js`:
+  `PlaybookContents` draws what is inside a playbook from its `playbook.json`
+  (the Muster format, 0.x). The files come in the order a person works
+  through them, each with its role in words, the file another is a form of,
+  and whether a page opens offline; then the placeholders a buyer fills in,
+  by when they fill them in, saying when two are one case apart. It fetches
+  nothing and never draws a file's text, so a page can show a playbook's
+  contents before it is bought. A host can add a sentence of its own beside a
+  file (`fileNotes`). A document in a major it does not read, or missing what
+  drawing needs, is refused whole, in a sentence saying why.
+  `Gatehouse.playbookData` carries the reader it uses. The README's *A
+  playbook's contents* has the shape, and the stylesheet styles it as
+  `gh-playbook-*` classes, themed through the same tokens.
+
 ## [0.2.0] — 2026-10-10
 
 ### Added
