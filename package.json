@@ -15,6 +15,7 @@
     "agent",
     "mcp",
     "sse",
+    "playbook",
     "browser",
     "no-build"
   ],
@@ -29,6 +30,7 @@
     "./refusal_copy.js": "./src/refusal_copy.js",
     "./run_renderer.js": "./src/run_renderer.js",
     "./host_blocks.js": "./src/host_blocks.js",
+    "./playbook_contents.js": "./src/playbook_contents.js",
     "./gatehouse.css": "./src/gatehouse.css",
     "./package.json": "./package.json"
   },
