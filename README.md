@@ -8,7 +8,9 @@ A browser client for [Postern](https://github.com/sigrix-io/postern). Given a ru
 
 Beside the run page, four blocks a host draws from its own data, for a page that shows several apps at once: a card per app, a list of them, a run history and a usage summary. They are handed documents rather than clients, so drawing a page of apps wakes none of their runners.
 
-Five scripts and a stylesheet. No build step, no runtime dependency, no second origin.
+And one block for a playbook, a process a business runs by hand and sells as files: handed its `playbook.json`, it draws what is inside, the files in the order a person works through them and the placeholders a buyer fills in, and never a file's text.
+
+Six scripts and a stylesheet. No build step, no runtime dependency, no second origin.
 
 > **0.x.** Nothing is stable before 1.0; pin the minor. See `VERSIONING.md`.
 
@@ -18,7 +20,7 @@ Five scripts and a stylesheet. No build step, no runtime dependency, no second o
 npm install @sigrix-io/gatehouse
 ```
 
-Serve the six files it installs in `node_modules/@sigrix-io/gatehouse/src/` (or copy them from this repository's `src/`; there is nothing to build). A run page loads four of the scripts, in this order:
+Serve the seven files it installs in `node_modules/@sigrix-io/gatehouse/src/` (or copy them from this repository's `src/`; there is nothing to build). A run page loads four of the scripts, in this order:
 
 ```html
 <link rel="stylesheet" href="gatehouse.css">
@@ -48,7 +50,7 @@ Each script is an IIFE that adds to one global, `window.Gatehouse`. `window.Sigr
 
 `renderer.load()` reads `describe` and `status` and draws the page. Running, stopping and retrying are the page's own buttons.
 
-A page of apps loads `host_blocks.js`, alone or after the four; see [Host blocks](#host-blocks).
+A page of apps loads `host_blocks.js`, alone or after the four; see [Host blocks](#host-blocks). A page showing a playbook loads `playbook_contents.js`, alone or beside the others; see [A playbook's contents](#a-playbooks-contents).
 
 ## The rules that are easy to erode
 
@@ -58,7 +60,7 @@ Each is held by a test rather than by memory (`tests/contract.test.js` and the s
 - **No markup from the agent.** `innerHTML` appears nowhere. Agent output and every streamed `delta.text` reach the page through `textContent`.
 - **No `EventSource`, and no retry loop around the stream.** It cannot POST and it reconnects on its own, and a reopened stream is a new run: the way a client spends someone's money twice. A disconnect is a cancel, so Stop is an `AbortController`.
 - **Zero imports, and no distributor.** Nothing here names a marketplace or a listing.
-- **Documents are handed in.** The composition and the choice arrive as data from whoever mounted the page, and so does everything the host blocks draw. Fetching them here would be reaching for a fifth verb, and Postern has four.
+- **Documents are handed in.** The composition and the choice arrive as data from whoever mounted the page, and so does everything the host blocks and the playbook block draw. Fetching them here would be reaching for a fifth verb, and Postern has four.
 - **A link goes only to a web address.** An address a runner's author wrote becomes a link only when it is an absolute `http` or `https` one, so a `javascript:` address in `describe` is never something a click runs.
 
 ## The composition
@@ -188,9 +190,44 @@ Each carries `"v": 1`. A block refuses a document in a version it does not read,
 - **A link is a web address.** `signup_url` must be an absolute `http` or `https` address, and `run_url` may also be a path on the host's page; anything else draws no link.
 - **Nothing is fetched.** A test spies on `fetch` while every block draws.
 
+## A playbook's contents
+
+A playbook is a process a business runs by hand, sold as the files a person works through: the steps, the copy to send, the checklists, an offline tool or two. Its `playbook.json`, in the Muster format, says what each file is for and which placeholders a buyer fills in. This block draws that document, so a page can show what is inside a playbook to someone deciding whether to buy it, without handing over a file.
+
+```html
+<link rel="stylesheet" href="gatehouse.css">
+<div id="inside"></div>
+
+<script src="playbook_contents.js"></script>
+<script>
+  new Gatehouse.PlaybookContents(document.getElementById('inside'), playbookJson, {
+    fileNotes: { 'tools/reconcile.html': 'Its scripts run under a policy that blocks every network request.' },
+  }).render();
+</script>
+```
+
+| Constructor | Draws | Options |
+| --- | --- | --- |
+| `PlaybookContents(container, playbook, options)` | the files in `order`, each with its role, then the placeholders by when a buyer fills them in | `headingLevel` (2 to 6, default 3; the placeholders' kinds take the level below), `fileNotes` |
+
+It has `render()` and `update(playbook)`, as the host blocks do. `Gatehouse.playbookData.readPlaybook` answers `{ value }` or `{ refusal }` as the block reads a document, so a host can test what it hands in.
+
+### The document
+
+A playbook's own `playbook.json`, parsed, in format 0.x. The block reads `format_version`, `files` (each one's `path`, `role`, `same_as` and `self_contained`), `order` and the two lists of `slots`, `setup` and `message`, and ignores every other member, as a reader of the format may: a minor version only adds members an earlier reader can ignore, so any 0.x is drawn, and a major it does not know is refused whole, saying so.
+
+- **The files, in `order`.** Each with its role in words (`guide`, `steps`, `checklist`, `copy`, `reference`, `tool`, `license`, `changelog`; a role it does not know is shown as spelled). A file that is another form of one (`same_as`) says which, and an `.html` file says it opens in a browser, and that it works offline only when the document calls it `self_contained`.
+- **The placeholders, by when they are filled in.** `setup` once, for the buyer's business, and `message` each time the playbook is used, each token as the files write it beside its label. Two tokens one case apart, `[NAME]` and `[name]`, are two placeholders, and the block says so.
+- **What it refuses.** A document in another major, or one whose `files`, `order` or `slots` are missing or not what the format says they are, or whose `order` and `same_as` name a file `files` does not list (paths match exactly, as in the format). It checks what drawing needs and no more: whether the files really say what the document claims is a checker's question, asked of the files, which the block never has.
+- **`fileNotes`.** A sentence of the host's own about a file, keyed by its path and drawn beside it: something the host knows that the document does not say, such as what it found when it read the file. A note for a path the playbook does not hold is not drawn.
+
+### What it keeps
+
+The host blocks' rules: every string reaches the page through `textContent`, no attribute is written from the document, and nothing is fetched. And one of its own: it never reads or draws a file's text, only what the document says the files are.
+
 ## Styling
 
-`gatehouse.css` styles every class the scripts draw, the run page's `run-*` and the host blocks' `gh-*`, and `tests/stylesheet.test.js` fails when one has no rule. Colours are custom properties on `.run-shell` and on `.gh-block`, the root of every host block: each `--run-*` reads a host's `--sx-*` token when the page defines one and falls back to its own value, so the file works alone and a host can theme it. A status colour comes as a fill (`--run-ok`, `--run-warn`, `--run-danger`) for borders and bars, and as an ink (`--run-ok-text` and the rest, from a host's `--sx-*-text`) for words. Dark values apply under `[data-theme="dark"]` on any ancestor.
+`gatehouse.css` styles every class the scripts draw, the run page's `run-*` and the blocks' `gh-*`, and `tests/stylesheet.test.js` fails when one has no rule. Colours are custom properties on `.run-shell` and on `.gh-block`, the root of every block: each `--run-*` reads a host's `--sx-*` token when the page defines one and falls back to its own value, so the file works alone and a host can theme it. A status colour comes as a fill (`--run-ok`, `--run-warn`, `--run-danger`) for borders and bars, and as an ink (`--run-ok-text` and the rest, from a host's `--sx-*-text`) for words. Dark values apply under `[data-theme="dark"]` on any ancestor.
 
 ## Where it fits
 
@@ -200,6 +237,7 @@ Gatehouse is one of the open-source projects [Sigrix](https://sigrix.io) publish
 - **[sigrix-runtime](https://github.com/sigrix-io/sigrix-runtime)** (`pip install sigrix-runtime`), a runner to point it at: the one inside every bundle Sigrix delivers, which can also serve an MCP server's tools as one agent. Start it with `--allow-origin` set to the page's origin.
 - **[postern-conformance](https://pypi.org/project/postern-conformance/)** (`pip install postern-conformance`), which reports the level a runner really meets before you draw a page for it.
 - **[Bailey](https://github.com/sigrix-io/bailey)**, the open-source assistant: the app planned for its 0.1 draws a solution's apps with Gatehouse.
+- **Muster**, the format a playbook's `playbook.json` is written in, which the playbook block reads. Its schema is at [sigrix.io/schemas/muster/0.1/playbook.schema.json](https://sigrix.io/schemas/muster/0.1/playbook.schema.json).
 
 Every project Sigrix publishes, and a map of how they connect: [sigrix.io/open-source](https://sigrix.io/open-source).
 
@@ -210,7 +248,7 @@ npm ci
 npm test
 ```
 
-The scripts are loaded the way a browser loads them, read and evaluated in order, rather than imported. The fixtures in `tests/fixtures/postern_describe/` are real documents: the Postern conformance fake's, a pipeline crew's, and an MCP server's as a runner builds it from a real `tools/list` answer. Those in `tests/fixtures/host_blocks/` are the three documents a host hands the blocks, one of each state and outcome among them.
+The scripts are loaded the way a browser loads them, read and evaluated in order, rather than imported. The fixtures in `tests/fixtures/postern_describe/` are real documents: the Postern conformance fake's, a pipeline crew's, and an MCP server's as a runner builds it from a real `tools/list` answer. Those in `tests/fixtures/host_blocks/` are the three documents a host hands the blocks, one of each state and outcome among them, and `tests/fixtures/playbooks/` holds a `playbook.json` as an author writes one.
 
 ## Licence
 

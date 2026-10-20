@@ -349,6 +349,43 @@ tbody tr:first-child > .gh-table-cell { border-top: 0; }
 .gh-days-table > .gh-table { margin-top: 8px; border: 1px solid var(--run-line); }
 .gh-days-table-toggle { cursor: pointer; color: var(--run-text-2); }
 
+/* ---------- a playbook ----------
+ *
+ * Its files in order, then its placeholders. A path, a token and a label are
+ * someone's typing and may be one long word, so each wraps anywhere rather
+ * than pushing the block past a phone's edge. */
+.gh-playbook { display: grid; gap: 22px; min-width: 0; }
+.gh-playbook-part { display: grid; gap: 8px; min-width: 0; }
+.gh-playbook-heading { font-size: 16px; font-weight: 650; letter-spacing: -0.01em; margin: 0; }
+.gh-playbook-subheading { font-size: 12.5px; font-weight: 600; color: var(--run-text-2); margin: 8px 0 0; }
+.gh-playbook-lead { font-size: 12.5px; line-height: 1.5; color: var(--run-text-2); margin: 0; max-width: 72ch; }
+/* The browser's own numbers, so each file keeps its place in the order
+ * however its row wraps. A list item laid out as a flex row is drawn with no
+ * number, so the row's parts sit in a box of their own. */
+.gh-playbook-files { margin: 0; padding: 0 0 0 1.8em; }
+.gh-playbook-file { padding: 9px 0; border-top: 1px solid var(--run-line); min-width: 0; }
+.gh-playbook-file:first-child { border-top: 0; }
+.gh-playbook-file::marker { font-size: 12px; color: var(--run-text-3); font-variant-numeric: tabular-nums; }
+.gh-playbook-file-body { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; min-width: 0; }
+.gh-playbook-path { font-family: var(--run-mono); font-size: 12.5px; color: var(--run-text); min-width: 0; overflow-wrap: anywhere; }
+.gh-playbook-role {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.02em; color: var(--run-text-2); white-space: nowrap;
+  background: var(--run-surface-2); border: 1px solid var(--run-line); border-radius: 999px; padding: 1px 8px;
+}
+/* A sentence of its own under the path, on a line the flex row gives it. */
+.gh-playbook-about, .gh-playbook-note { flex: 1 1 100%; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.gh-playbook-about { color: var(--run-text-3); }
+.gh-playbook-note { color: var(--run-text-2); }
+.gh-playbook-slot-group { display: grid; gap: 6px; min-width: 0; }
+.gh-playbook-slots { margin: 0; display: grid; gap: 6px; }
+.gh-playbook-slot { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; min-width: 0; }
+.gh-playbook-slot-name { margin: 0; min-width: 0; }
+.gh-playbook-token {
+  font-family: var(--run-mono); font-size: 12px; color: var(--run-text); overflow-wrap: anywhere;
+  background: var(--run-surface-2); border: 1px solid var(--run-line); border-radius: 6px; padding: 1px 6px;
+}
+.gh-playbook-slot-label { margin: 0; flex: 1 1 16ch; min-width: 0; font-size: 12.5px; line-height: 1.5; color: var(--run-text-2); overflow-wrap: anywhere; }
+
 [data-theme="dark"] .run-shell, [data-theme="dark"] .gh-block {
   --run-line: var(--sx-line, #232936);
   --run-surface: var(--sx-surface, #14181F);
