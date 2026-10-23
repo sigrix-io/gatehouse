@@ -237,7 +237,7 @@ Gatehouse is one of the open-source projects [Sigrix](https://sigrix.io) publish
 - **[sigrix-runtime](https://github.com/sigrix-io/sigrix-runtime)** (`pip install sigrix-runtime`), a runner to point it at: the one inside every bundle Sigrix delivers, which can also serve an MCP server's tools as one agent. Start it with `--allow-origin` set to the page's origin.
 - **[postern-conformance](https://pypi.org/project/postern-conformance/)** (`pip install postern-conformance`), which reports the level a runner really meets before you draw a page for it.
 - **[Bailey](https://github.com/sigrix-io/bailey)**, the open-source assistant: the app planned for its 0.1 draws a solution's apps with Gatehouse.
-- **Muster**, the format a playbook's `playbook.json` is written in, which the playbook block reads. Its schema is at [sigrix.io/schemas/muster/0.1/playbook.schema.json](https://sigrix.io/schemas/muster/0.1/playbook.schema.json).
+- **[Muster](https://github.com/sigrix-io/muster)**, the format a playbook's `playbook.json` is written in, which the playbook block reads. Its schema is at [sigrix.io/schemas/muster/0.1/playbook.schema.json](https://sigrix.io/schemas/muster/0.1/playbook.schema.json).
 
 Every project Sigrix publishes, and a map of how they connect: [sigrix.io/open-source](https://sigrix.io/open-source).
 
