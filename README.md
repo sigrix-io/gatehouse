@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/sigrix-io/gatehouse/main/.github/assets/logo-on-dark.svg">
+    <img src="https://raw.githubusercontent.com/sigrix-io/gatehouse/main/.github/assets/logo.svg" alt="Gatehouse" width="120">
+  </picture>
+</p>
+
 # Gatehouse
 
 [![npm](https://img.shields.io/npm/v/@sigrix-io/gatehouse)](https://www.npmjs.com/package/@sigrix-io/gatehouse)

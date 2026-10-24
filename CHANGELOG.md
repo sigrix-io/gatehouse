@@ -5,6 +5,13 @@ follows [VERSIONING.md](VERSIONING.md), which is worth reading before pinning.
 
 ## [Unreleased]
 
+### Changed
+
+- The README carries the project's logo above its title, and readers in
+  GitHub's dark mode are shown a version drawn for it. The README is the npm
+  page too, so the next release carries the logo there. Nothing in the package
+  changes.
+
 ## [0.3.0] — 2026-10-20
 
 ### Added
