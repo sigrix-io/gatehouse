@@ -426,6 +426,40 @@
   /* SPEC 4.1.2: a client SHOULD surface `write_tools` and MAY require a
    * confirmation. This one requires it, once per session, because the tools
    * named here are the ones that spend money or reach past the workspace. */
+  /* How much of a conversation a reply carries when the host names no bound
+   * and the brief declares no `max_length`: about four thousand tokens of
+   * text, enough for several exchanges and a cap on what a long one costs. */
+  const CONVERSATION_MAX_CHARS = 16000;
+
+  /* A reply in a conversation, as the one brief a run takes. No verb takes a
+   * `run_id` (SPEC 4.5), so a client cannot point a run at an earlier one, and
+   * the way an agent sees what was said before is for the client to send it.
+   * The earlier turns come first, oldest first, then the new message, each
+   * under a line saying whose words they are, in plain text the agent reads as
+   * its brief.
+   *
+   * `limit` bounds the whole in characters. The oldest turns are the ones
+   * left out when it would pass it, and the answer says how many were, so the
+   * page can say so rather than let a reader think the agent saw them. The new
+   * message is never cut: the field's own `max_length` bounds it as typed. */
+  function conversationBrief(turns, message, limit) {
+    const said = text(message);
+    const all = asArray(turns).filter(isObject);
+    const cap = typeof limit === 'number' && limit > 0 ? limit : CONVERSATION_MAX_CHARS;
+    for (let first = 0; first < all.length; first++) {
+      const kept = all.slice(first);
+      const parts = ['This continues an earlier exchange with you. What was said before, oldest first:'];
+      kept.forEach(function (turn) {
+        parts.push('The user wrote:\n' + text(turn.brief));
+        parts.push('You answered:\n' + text(turn.answer));
+      });
+      parts.push('Now the user writes, and this is the message to answer:\n' + said);
+      const value = parts.join('\n\n');
+      if (value.length <= cap) return { value, sent: kept.length, dropped: first };
+    }
+    return { value: said, sent: 0, dropped: all.length };
+  }
+
   function capabilities(describe) {
     const declared = isObject(describe && describe.capabilities) ? describe.capabilities : {};
     const writeTools = asArray(declared.write_tools).map(text).filter(Boolean);
@@ -621,6 +655,8 @@
       formFields,
       runInputs,
       initialValues,
+      conversationBrief,
+      CONVERSATION_MAX_CHARS,
       examples,
       outputPlan,
       capabilities,

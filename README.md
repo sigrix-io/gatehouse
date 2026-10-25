@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/sigrix-io/gatehouse/main/.github/assets/logo-on-dark.svg">
+    <img src="https://raw.githubusercontent.com/sigrix-io/gatehouse/main/.github/assets/logo.svg" alt="Gatehouse" width="120">
+  </picture>
+</p>
+
 # Gatehouse
 
 [![npm](https://img.shields.io/npm/v/@sigrix-io/gatehouse)](https://www.npmjs.com/package/@sigrix-io/gatehouse)
@@ -46,7 +53,7 @@ Each script is an IIFE that adds to one global, `window.Gatehouse`. `window.Sigr
 | Constructor | Arguments |
 | --- | --- |
 | `PosternClient(baseUrl, options)` | `baseUrl`: where the runner (or the proxy) answers; every request goes to it under `/postern/v0`. `options.headers`: extra headers for every request. `options.fetchImpl`: a `fetch` to use instead of the page's. |
-| `RunRenderer(container, client, options)` | `container`: the element to draw into. `client`: anything with the four verbs. `options.composition`, `options.choice`, `options.hosted`: below. |
+| `RunRenderer(container, client, options)` | `container`: the element to draw into. `client`: anything with the four verbs. `options.composition`, `options.choice`, `options.hosted`, `options.conversation`: below. |
 
 `renderer.load()` reads `describe` and `status` and draws the page. Running, stopping and retrying are the page's own buttons.
 
@@ -92,6 +99,18 @@ The form shows only the chosen option's inputs; a chosen option's `required` add
 ## Hosted runs
 
 `options.hosted: true` says the page's operator runs the runner, not the person reading it. It changes only what a failure may quote back: an `agent_error` is the one refusal whose message carries what a model provider said about the *operator's* credentials, so on a hosted page it is withheld and the reader sees the next move alone.
+
+## A conversation
+
+No verb takes a run's `run_id` (SPEC §4.5), so a client cannot point a run at the one before it, and a page that sends one brief and shows one answer gives a reader nothing to answer an agent's question with; each new brief replaces the last answer. `options.conversation: true` keeps the exchange on the page instead:
+
+- **Each brief and its answer become a turn**, drawn above the form, oldest first, the answer as the result panel would draw it (structure in the `markdown` output mode, text otherwise). The box empties for the reply, and the result panel is emptied rather than showing the answer twice.
+- **A reply carries the turns before it.** The reserved `prompt` input is sent as one brief holding the earlier turns, oldest first and each said by whom, then the new message: `Gatehouse.viewModel.conversationBrief(turns, message, limit)` composes it, so the agent reads the whole exchange as its brief. Every other input is sent as it is.
+- **What a reply carries is bounded**: by the brief's own `max_length`, which the runner enforces, and by `options.conversation.maxChars` (`{ maxChars: 8000 }`), or 16,000 characters when neither is set (`CONVERSATION_MAX_CHARS`). The oldest turns are left out first, every turn stays on the page, and a note says how many no longer fit. The new message is never cut.
+- **Only an answer the page can show as text is a turn.** A refusal, a stop, a file or an output type this client cannot draw leaves the brief in its box to send again.
+- **The page holds it, and nothing else does.** The turns live in the renderer, so leaving the page forgets them; a reader starts over sooner with **New conversation**.
+
+A runner whose `describe` declares no text `prompt` has nothing to reply into, and its page stays the one-run page whatever the host asked for.
 
 ## Several apps on one page
 
@@ -237,7 +256,7 @@ Gatehouse is one of the open-source projects [Sigrix](https://sigrix.io) publish
 - **[sigrix-runtime](https://github.com/sigrix-io/sigrix-runtime)** (`pip install sigrix-runtime`), a runner to point it at: the one inside every bundle Sigrix delivers, which can also serve an MCP server's tools as one agent. Start it with `--allow-origin` set to the page's origin.
 - **[postern-conformance](https://pypi.org/project/postern-conformance/)** (`pip install postern-conformance`), which reports the level a runner really meets before you draw a page for it.
 - **[Bailey](https://github.com/sigrix-io/bailey)**, the open-source assistant: the app planned for its 0.1 draws a solution's apps with Gatehouse.
-- **Muster**, the format a playbook's `playbook.json` is written in, which the playbook block reads. Its schema is at [sigrix.io/schemas/muster/0.1/playbook.schema.json](https://sigrix.io/schemas/muster/0.1/playbook.schema.json).
+- **[Muster](https://github.com/sigrix-io/muster)**, the format a playbook's `playbook.json` is written in, which the playbook block reads. Its schema is at [sigrix.io/schemas/muster/0.1/playbook.schema.json](https://sigrix.io/schemas/muster/0.1/playbook.schema.json).
 
 Every project Sigrix publishes, and a map of how they connect: [sigrix.io/open-source](https://sigrix.io/open-source).
 
