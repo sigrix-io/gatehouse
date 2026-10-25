@@ -5,6 +5,8 @@ follows [VERSIONING.md](VERSIONING.md), which is worth reading before pinning.
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-10-25
+
 ### Added
 
 - A conversation on the run page, behind `options.conversation`. Each brief
