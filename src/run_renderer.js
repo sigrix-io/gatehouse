@@ -309,21 +309,21 @@
       this.values[field.key] = '';
       const control = this.nodes.inputs[field.key];
       if (control) control.value = '';
-      this.idempotencyKey = '';
       this.lastDropped = NS.viewModel.conversationBrief(this.turns, '', this.conversationLimit(field)).dropped;
       this.syncConversation();
       if (control) control.focus();
     }
 
+    /* Reached only from its button, which `syncConversation` disables while a
+     * run is in flight, so a run never records into a conversation it did not
+     * start from. */
     resetConversation() {
-      if (this.abortController) return;
       this.turns = [];
       this.lastDropped = 0;
       if (this.nodes.turns) {
         this.revokeDownloads(this.nodes.turns);
         clear(this.nodes.turns);
       }
-      this.idempotencyKey = '';
       this.syncConversation();
       const field = this.conversationField();
       if (field && this.nodes.inputs[field.key]) this.nodes.inputs[field.key].focus();

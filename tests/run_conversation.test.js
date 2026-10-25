@@ -154,6 +154,13 @@ suite('the conversation brief', () => {
     ];
     expect(vm.conversationBrief(history, 'reply').dropped).toBe(1);
   });
+
+  it('skips what is not a turn, as every reader in the view model does', () => {
+    const vm = loadRenderer().viewModel;
+    const reply = vm.conversationBrief([null, 'a turn?', { brief: 'b', answer: 'a' }], 'the reply');
+    expect(reply).toMatchObject({ sent: 1, dropped: 0 });
+    expect(reply.value).not.toContain('a turn?');
+  });
 });
 
 suite('a page with no conversation', () => {
@@ -167,10 +174,18 @@ suite('a page with no conversation', () => {
     expect(container.querySelector('.run-result').textContent).toBe('second answer');
   });
 
-  it('draws none for a runner with no text brief, whatever the host asked for', async () => {
+  /* A brief that is not text has nothing to carry a conversation in: a picked
+   * option sent as a composed exchange is a value the runner never offered. */
+  it.each([
+    ['no brief', () => null],
+    [
+      'a brief that is a select',
+      input => ({ ...input, type: 'select', validation: { options: ['Review this MSA', 'Review this NDA'] } }),
+    ],
+  ])('draws none for a runner with %s, whatever the host asked for', async (_, brief) => {
     const docs = crew();
     const describeDoc = Object.assign({}, docs.describe, {
-      inputs: docs.describe.inputs.filter(input => input.key !== 'prompt'),
+      inputs: docs.describe.inputs.map(input => (input.key === 'prompt' ? brief(input) : input)).filter(Boolean),
     });
     const { container } = await mount({ options: { conversation: true }, describeDoc });
     expect(container.querySelector('.run-conversation')).toBeNull();
@@ -326,13 +341,18 @@ suite('a conversation', () => {
     expect(container.querySelector('.run-conversation-note').textContent).toMatch(/oldest messages|first message/);
   });
 
-  it("holds a reply to the brief's own max_length, which the runner enforces", async () => {
+  /* A host bound that is not a positive number is no bound at all, so the
+   * brief's own still holds rather than giving way to it. */
+  it.each([
+    ['no host bound', true],
+    ['a host bound below zero', { maxChars: -1 }],
+  ])("holds a reply to the brief's own max_length, which the runner enforces, under %s", async (_, conversation) => {
     const docs = crew();
     const describeDoc = JSON.parse(JSON.stringify(docs.describe));
     describeDoc.inputs.find(input => input.key === 'prompt').validation = { max_length: 120 };
     const { container, renderer, sent } = await mount({
       answers: ['a'.repeat(80), 'second answer'],
-      options: { conversation: true },
+      options: { conversation },
       describeDoc,
     });
     await send(container, renderer, 'first brief');
