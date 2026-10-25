@@ -25,6 +25,17 @@
     while (node.firstChild) node.removeChild(node.firstChild);
   }
 
+  /* `options.conversation`: `true`, or `{ maxChars }` to bound what a reply
+   * carries. Anything else is no conversation: the one-run page this file has
+   * always drawn. */
+  function conversationSettings(option) {
+    if (option === true) return { maxChars: null };
+    if (option && typeof option === 'object') {
+      return { maxChars: typeof option.maxChars === 'number' && option.maxChars > 0 ? option.maxChars : null };
+    }
+    return null;
+  }
+
   function randomKey() {
     /* An idempotency key only has to be unique to this client (SPEC 4.2). */
     if (root.crypto && typeof root.crypto.randomUUID === 'function') return root.crypto.randomUUID();
@@ -49,7 +60,9 @@
      * `reportFailure`). `options.choice` says one select input chooses which
      * of the others apply (`inputChoice` in the view model has its shape): a
      * fact the host read about this runner, handed in for the composition's
-     * reason. Nothing else is read. */
+     * reason. `options.conversation` keeps each brief and answer on the page
+     * and sends them with the next brief (`renderConversation`). Nothing else
+     * is read. */
     constructor(container, client, options) {
       const settings = options || {};
       this.container = container;
@@ -70,6 +83,12 @@
       this.lastInputsKey = '';
       this.idempotencyKey = '';
       this.onRunStateChange = settings.onRunStateChange || function () {};
+      this.conversation = conversationSettings(settings.conversation);
+      /* Held here and nowhere else: the page forgets the conversation when it
+       * is left, and a runner is only ever sent it inside a brief. */
+      this.turns = [];
+      this.lastDropped = 0;
+      this.lastAnswer = null;
       this.nodes = {};
       renderersMade += 1;
       this.idScope = 'run-' + renderersMade;
@@ -110,6 +129,8 @@
       shell.appendChild(this.renderReadiness(vm));
       const templates = this.renderTemplates(vm);
       if (templates) shell.appendChild(templates);
+      const conversation = this.renderConversation(vm);
+      if (conversation) shell.appendChild(conversation);
       shell.appendChild(this.renderForm(vm));
       shell.appendChild(this.renderControls(vm));
       shell.appendChild(this.renderOutput());
@@ -203,6 +224,122 @@
         section.appendChild(shown);
       }
       return section;
+    }
+
+    /* The field a conversation carries: the reserved brief, where the runner
+     * declares it as text. A runner with none has nothing to reply into, so
+     * its page stays the one-run page whatever the host asked for. */
+    conversationField() {
+      if (!this.conversation || !this.viewModel) return null;
+      const key = NS.viewModel.PROMPT_KEY;
+      return this.viewModel.fields.find(field => field.key === key && field.type === 'text') || null;
+    }
+
+    /* The characters a reply may carry: the brief's own `max_length`, which the
+     * runner enforces, and the host's bound or the view model's under it. */
+    conversationLimit(field) {
+      const bounds = [this.conversation.maxChars || NS.viewModel.CONVERSATION_MAX_CHARS];
+      if (field.maxLength !== null) bounds.push(field.maxLength);
+      return Math.min.apply(Math, bounds);
+    }
+
+    /* A conversation, above the form: each brief sent and the answer it got,
+     * oldest first. No verb takes a `run_id` (SPEC 4.5), so a run cannot be
+     * pointed at the one before it: the agent sees what came before because
+     * the next brief carries it, which `conversationBrief` composes, and the
+     * note says so. */
+    renderConversation(vm) {
+      if (!this.conversationField()) return null;
+      const self = this;
+      const section = el('section', 'run-conversation');
+      section.setAttribute('aria-label', 'Conversation');
+      this.nodes.turns = el('ol', 'run-turns');
+      section.appendChild(this.nodes.turns);
+      const foot = el('div', 'run-conversation-foot');
+      this.nodes.conversationNote = el('p', 'run-conversation-note');
+      foot.appendChild(this.nodes.conversationNote);
+      const reset = el('button', 'run-conversation-reset', 'New conversation');
+      reset.type = 'button';
+      reset.addEventListener('click', function () { self.resetConversation(); });
+      foot.appendChild(reset);
+      section.appendChild(foot);
+      this.nodes.conversation = section;
+      this.nodes.conversationReset = reset;
+      this.turns.forEach(function (turn) { self.appendTurn(turn, vm); });
+      this.syncConversation();
+      return section;
+    }
+
+    appendTurn(turn, vm) {
+      const item = el('li', 'run-turn');
+      item.appendChild(el('p', 'run-turn-who', 'You'));
+      item.appendChild(el('p', 'run-turn-brief', turn.brief));
+      item.appendChild(el('p', 'run-turn-who', vm.header.name || 'The agent'));
+      const answer = el('div', 'run-turn-answer');
+      /* Drawn as the result panel draws it, so a turn reads the same before
+       * and after it moves up: structure for `markdown`, text for the rest. */
+      if (vm.output.mode === 'markdown') this.renderMarkdown(turn.answer, answer);
+      else answer.appendChild(el('p', 'run-turn-text', turn.answer));
+      if (vm.output.mode === 'file') answer.appendChild(this.textDownloadLink(turn.answer));
+      item.appendChild(answer);
+      this.nodes.turns.appendChild(item);
+    }
+
+    syncConversation() {
+      if (!this.nodes.conversation) return;
+      this.nodes.conversation.hidden = this.turns.length === 0;
+      this.nodes.conversationReset.disabled = Boolean(this.abortController);
+      const dropped = this.lastDropped;
+      this.nodes.conversationNote.textContent = dropped
+        ? 'A reply sends the conversation above with it, except the ' +
+          (dropped === 1 ? 'first message, which no longer fits' : dropped + ' oldest messages, which no longer fit') +
+          '. The page forgets it when you leave.'
+        : 'A reply sends the conversation above with it, so the agent can build on it. The page forgets it when you leave.';
+    }
+
+    recordTurn(message, answer) {
+      const field = this.conversationField();
+      const turn = { brief: message, answer: answer };
+      this.turns.push(turn);
+      this.appendTurn(turn, this.viewModel);
+      /* The answer lives in the conversation now, so the result panel is
+       * emptied rather than left showing it twice. The usage line and the
+       * timeline stay: they are about the run that has just ended. */
+      this.nodes.result.textContent = '';
+      this.clearRendered();
+      this.values[field.key] = '';
+      const control = this.nodes.inputs[field.key];
+      if (control) control.value = '';
+      this.lastDropped = NS.viewModel.conversationBrief(this.turns, '', this.conversationLimit(field)).dropped;
+      this.syncConversation();
+      if (control) control.focus();
+    }
+
+    /* Reached only from its button, which `syncConversation` disables while a
+     * run is in flight, so a run never records into a conversation it did not
+     * start from. */
+    resetConversation() {
+      this.turns = [];
+      this.lastDropped = 0;
+      if (this.nodes.turns) {
+        this.revokeDownloads(this.nodes.turns);
+        clear(this.nodes.turns);
+      }
+      this.syncConversation();
+      const field = this.conversationField();
+      if (field && this.nodes.inputs[field.key]) this.nodes.inputs[field.key].focus();
+    }
+
+    revokeDownloads(scope) {
+      Array.prototype.slice.call(scope.querySelectorAll('.run-download')).forEach(function (node) {
+        URL.revokeObjectURL(node.href);
+        node.parentNode.removeChild(node);
+      });
+    }
+
+    clearRendered() {
+      this.revokeDownloads(this.nodes.rendered);
+      clear(this.nodes.rendered);
     }
 
     renderForm(vm) {
@@ -397,6 +534,7 @@
        * content only, so headings and lists cannot be built inside it. */
       this.nodes.rendered = el('div', 'run-result-rendered');
       this.nodes.usage = el('p', 'run-usage');
+      this.nodes.output = section;
       section.appendChild(this.nodes.notice);
       section.appendChild(this.nodes.timeline);
       section.appendChild(this.nodes.result);
@@ -441,6 +579,16 @@
       if (!vm.level.canRun || this.abortController) return;
 
       const inputs = NS.viewModel.runInputs(vm.fields, this.values, vm.choice);
+      /* In a conversation the brief carries the turns before it. What was
+       * typed is kept apart, because that, not the composed whole, is the
+       * turn the page records. */
+      const brief = this.conversationField();
+      const message = brief && this.values[brief.key] !== undefined ? String(this.values[brief.key]) : '';
+      if (brief && this.turns.length && Object.prototype.hasOwnProperty.call(inputs, brief.key)) {
+        const reply = NS.viewModel.conversationBrief(this.turns, message, this.conversationLimit(brief));
+        inputs[brief.key] = reply.value;
+        this.lastDropped = reply.dropped;
+      }
       const inputsKey = JSON.stringify(inputs);
       if (vm.capabilities.idempotentRetry) {
         /* A replay is free only for the same inputs under the same key. Edited
@@ -459,13 +607,10 @@
       /* A download link is appended beside the result rather than inside it,
        * so clearing the result does not remove it — two `bytes` runs would
        * otherwise leave two links, the older one pointing at the earlier
-       * result and no way to tell them apart. */
-      Array.prototype.slice
-        .call(this.container.querySelectorAll('.run-download'))
-        .forEach(function (node) {
-          URL.revokeObjectURL(node.href);
-          node.parentNode.removeChild(node);
-        });
+       * result and no way to tell them apart. Only the result panel's: a turn
+       * of the conversation keeps the link to its own answer. */
+      this.revokeDownloads(this.nodes.output);
+      this.lastAnswer = null;
       /* And a field marked invalid by the last refusal stops being marked, or
        * a corrected input keeps wearing the error that has just been fixed. */
       Object.keys(this.nodes.inputs || {}).forEach(key => {
@@ -476,18 +621,30 @@
       this.nodes.stop.disabled = false;
       this.nodes.retry.disabled = true;
       this.syncRunEnabled();
+      this.syncConversation();
       this.onRunStateChange('running');
 
+      /* A turn is recorded only for an answer the page could show as text: a
+       * refusal, a stop, a file or a type this client cannot draw leaves the
+       * brief in its field, to send again or change. */
+      let recorded = false;
       try {
         if (vm.level.streams) await this.runStreamed(inputs);
         else await this.runWhole(inputs);
+        if (brief && this.lastAnswer !== null) {
+          this.recordTurn(message, this.lastAnswer);
+          recorded = true;
+        }
       } catch (err) {
         this.reportFailure(err);
       } finally {
         this.abortController = null;
         this.nodes.stop.disabled = true;
-        this.nodes.retry.disabled = false;
+        /* Nothing to retry once the answer is a turn: its brief has left the
+         * field, and a reply is the next thing to send. */
+        this.nodes.retry.disabled = recorded;
         this.syncRunEnabled();
+        this.syncConversation();
         this.onRunStateChange('idle');
       }
     }
@@ -601,6 +758,7 @@
       }
 
       const value = output.value === undefined || output.value === null ? '' : String(output.value);
+      this.lastAnswer = value;
       if (plan.mode === 'markdown') {
         /* Structure only, and built node by node — see `outputBlocks`. The
          * `<pre>` is emptied rather than left carrying the stream's plain copy
@@ -618,8 +776,8 @@
       }
     }
 
-    renderMarkdown(value) {
-      const target = this.nodes.rendered;
+    renderMarkdown(value, into) {
+      const target = into || this.nodes.rendered;
       NS.viewModel.outputBlocks(value).forEach(function (block) {
         if (block.kind === 'heading') {
           /* Clamped to h2..h4: the page's own `<h1>` is the agent's name, and
@@ -643,10 +801,14 @@
     }
 
     offerTextDownload(value) {
+      this.nodes.rendered.appendChild(this.textDownloadLink(value));
+    }
+
+    textDownloadLink(value) {
       const link = el('a', 'run-download', 'Download the result');
       link.href = URL.createObjectURL(new Blob([value], { type: 'text/plain' }));
       link.download = 'result.txt';
-      this.nodes.rendered.appendChild(link);
+      return link;
     }
 
     offerDownload(output) {
