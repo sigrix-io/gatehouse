@@ -85,7 +85,7 @@
       this.onRunStateChange = settings.onRunStateChange || function () {};
       this.conversation = conversationSettings(settings.conversation);
       /* Held here and nowhere else: the page forgets the conversation when it
-       * is left, and the runner never had it. */
+       * is left, and a runner is only ever sent it inside a brief. */
       this.turns = [];
       this.lastDropped = 0;
       this.lastAnswer = null;
@@ -244,9 +244,10 @@
     }
 
     /* A conversation, above the form: each brief sent and the answer it got,
-     * oldest first. A run is independent of every other (SPEC 4.5), so the
-     * agent sees what came before only because the next brief carries it,
-     * which `conversationBrief` composes, and the note says so. */
+     * oldest first. No verb takes a `run_id` (SPEC 4.5), so a run cannot be
+     * pointed at the one before it: the agent sees what came before because
+     * the next brief carries it, which `conversationBrief` composes, and the
+     * note says so. */
     renderConversation(vm) {
       if (!this.conversationField()) return null;
       const self = this;

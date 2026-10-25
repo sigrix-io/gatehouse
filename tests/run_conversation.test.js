@@ -1,12 +1,12 @@
 /* A conversation on the run page: `options.conversation`.
  *
- * A run is independent of every other (SPEC 4.5), so an agent that ends on a
- * question leaves a one-run page nothing to answer it with, and each new brief
- * replaced the last answer on the page. With the option on, the page keeps each
- * brief and answer, and the next brief carries them, composed by the view
- * model's `conversationBrief`. The rules under test are the ones a reader
- * cannot see: what is sent, what is recorded as a turn, and what is left out
- * when the whole would pass its bound.
+ * No verb takes a `run_id` (SPEC 4.5), so a client cannot point a run at an
+ * earlier one: an agent that ends on a question leaves a one-run page nothing
+ * to answer it with, and each new brief replaced the last answer on the page.
+ * With the option on, the page keeps each brief and answer, and the next brief
+ * carries them, composed by the view model's `conversationBrief`. The rules
+ * under test are the ones a reader cannot see: what is sent, what is recorded
+ * as a turn, and what is left out when the whole would pass its bound.
  */
 import fs from 'node:fs';
 import path from 'node:path';

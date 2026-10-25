@@ -102,7 +102,7 @@ The form shows only the chosen option's inputs; a chosen option's `required` add
 
 ## A conversation
 
-A run is independent of every other (SPEC §4.5): the runner keeps nothing between them, so a page that sends one brief and shows one answer gives a reader nothing to answer an agent's question with, and each new brief replaces the last answer. `options.conversation: true` keeps the exchange on the page instead:
+No verb takes a run's `run_id` (SPEC §4.5), so a client cannot point a run at the one before it, and a page that sends one brief and shows one answer gives a reader nothing to answer an agent's question with; each new brief replaces the last answer. `options.conversation: true` keeps the exchange on the page instead:
 
 - **Each brief and its answer become a turn**, drawn above the form, oldest first, the answer as the result panel would draw it (structure in the `markdown` output mode, text otherwise). The box empties for the reply, and the result panel is emptied rather than showing the answer twice.
 - **A reply carries the turns before it.** The reserved `prompt` input is sent as one brief holding the earlier turns, oldest first and each said by whom, then the new message: `Gatehouse.viewModel.conversationBrief(turns, message, limit)` composes it, so the agent reads the whole exchange as its brief. Every other input is sent as it is.

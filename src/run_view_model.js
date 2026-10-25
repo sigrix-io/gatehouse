@@ -431,12 +431,12 @@
    * text, enough for several exchanges and a cap on what a long one costs. */
   const CONVERSATION_MAX_CHARS = 16000;
 
-  /* A reply in a conversation, as the one brief a run takes. A run is
-   * independent of every other (SPEC 4.5: a reopened stream is a new run), so
-   * the runner holds nothing between them, and the only way an agent sees what
-   * was said before is for the client to send it. The earlier turns come
-   * first, oldest first, then the new message, each under a line saying whose
-   * words they are, in plain text the agent reads as its brief.
+  /* A reply in a conversation, as the one brief a run takes. No verb takes a
+   * `run_id` (SPEC 4.5), so a client cannot point a run at an earlier one, and
+   * the way an agent sees what was said before is for the client to send it.
+   * The earlier turns come first, oldest first, then the new message, each
+   * under a line saying whose words they are, in plain text the agent reads as
+   * its brief.
    *
    * `limit` bounds the whole in characters. The oldest turns are the ones
    * left out when it would pass it, and the answer says how many were, so the
