@@ -5,6 +5,20 @@ follows [VERSIONING.md](VERSIONING.md), which is worth reading before pinning.
 
 ## [Unreleased]
 
+### Added
+
+- A conversation on the run page, behind `options.conversation`. Each brief
+  and its answer stay on the page as a turn, above the form, and a reply
+  sends the turns before it with the new message in the reserved `prompt`
+  input, composed by `Gatehouse.viewModel.conversationBrief`. What a reply
+  carries is bounded by the brief's `max_length` and by
+  `options.conversation.maxChars` (16,000 characters when neither is set),
+  the oldest turns left out first and the page saying how many. A refusal, a
+  stop or a file is no turn. Off by default, so a page that asks for nothing
+  is drawn as before; the stylesheet styles it as `run-conversation`,
+  `run-turn*` and `run-conversation-*`, and the run grid gains a
+  `conversation` row above the form, which takes no height when empty.
+
 ### Changed
 
 - The README carries the project's logo above its title, and readers in

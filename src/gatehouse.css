@@ -38,12 +38,12 @@
 .run-shell {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 300px;
-  grid-template-areas: "head rail" "form rail" "controls rail" "output rail";
+  grid-template-areas: "head rail" "conversation rail" "form rail" "controls rail" "output rail";
   gap: 0 24px;
   align-items: start;
 }
 @media (max-width: 960px) {
-  .run-shell { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "rail" "form" "controls" "output"; }
+  .run-shell { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "rail" "conversation" "form" "controls" "output"; }
 }
 /* Stated here rather than left to a host's reset, which a page linking only
  * this file does not have. A browser draws `select` border-box and `input` and
@@ -152,6 +152,45 @@
  * it could not honour, and this is the listing telling the buyer what to
  * write — they should not read as the same voice. */
 .run-field-help { font-size: 12.5px; color: var(--run-text-2); margin: 6px 0 0; max-width: 64ch; }
+
+/* ---------- conversation ----------
+ *
+ * Above the form, oldest first, so the newest answer sits just over the box
+ * the reply is typed into. A page that asked for no conversation draws no
+ * section, and its grid row is empty and takes no height. */
+.run-conversation { grid-area: conversation; margin-bottom: 18px; min-width: 0; }
+.run-conversation[hidden] { display: none; }
+.run-turns { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.run-turn {
+  background: var(--run-surface); border: 1px solid var(--run-line);
+  border-radius: 14px; padding: 14px 16px; min-width: 0;
+}
+.run-turn-who {
+  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--run-text-3); margin: 0 0 4px;
+}
+/* What the reader typed, as typed: their line breaks kept, and a long word
+ * (a URL, a key) broken rather than pushing the card wider than its column. */
+.run-turn-brief {
+  white-space: pre-wrap; overflow-wrap: anywhere; margin: 0 0 14px;
+  font-size: 14px; line-height: 1.55; color: var(--run-text-2);
+}
+.run-turn-answer { font-size: 14px; line-height: 1.62; overflow-wrap: anywhere; min-width: 0; }
+.run-turn-text { white-space: pre-wrap; margin: 0; max-width: 72ch; }
+.run-turn-answer .run-download { margin-top: 10px; }
+.run-conversation-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-top: 10px; }
+.run-conversation-note { font-size: 12px; color: var(--run-text-3); margin: 0; max-width: 64ch; flex: 1 1 260px; }
+.run-conversation-reset {
+  font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer;
+  border-radius: 10px; padding: 0 12px; height: 32px; min-height: 0;
+  background: var(--run-surface); color: var(--run-text); border: 1px solid var(--run-line);
+}
+.run-conversation-reset:disabled { opacity: 0.45; cursor: not-allowed; }
+/* A host may floor every button at 44px for a thumb; given back here, after
+ * the opt-out above, for the same reason the write gate's box is. */
+@media (pointer: coarse) {
+  .run-conversation-reset { min-height: 44px; }
+}
 
 /* ---------- controls ---------- */
 .run-controls { grid-area: controls; margin-top: 18px; }
