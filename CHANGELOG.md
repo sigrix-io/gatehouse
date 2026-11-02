@@ -5,6 +5,13 @@ follows [VERSIONING.md](VERSIONING.md), which is worth reading before pinning.
 
 ## [Unreleased]
 
+### Changed
+
+- The README's *Where it fits* says Bailey draws a solution's apps with
+  Gatehouse, and how to start it, now that its 0.1 is out; it had called
+  that app planned. The README is the npm page too, so the next release
+  carries it there. Nothing in the package changes.
+
 ## [0.4.0] — 2026-10-25
 
 ### Added
