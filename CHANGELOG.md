@@ -5,6 +5,8 @@ follows [VERSIONING.md](VERSIONING.md), which is worth reading before pinning.
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-11-05
+
 ### Added
 
 - A run row may carry `credits`, a count: what the host's credits paid for the
