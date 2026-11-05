@@ -5,6 +5,16 @@ follows [VERSIONING.md](VERSIONING.md), which is worth reading before pinning.
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-11-05
+
+### Added
+
+- A run row may carry `credits`, a count: what the host's credits paid for the
+  run. `RunHistory` draws a Credits column beside the tokens once any row
+  carries one, and a dash for a row whose run they paid nothing for. A history
+  with no such row is drawn as before, so a host that sends none needs no
+  change.
+
 ### Changed
 
 - The README's *Where it fits* says Bailey draws a solution's apps with

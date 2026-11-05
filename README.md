@@ -164,7 +164,7 @@ Each carries `"v": 1`. A block refuses a document in a version it does not read,
 }
 ```
 
-**Run row.** `app_id`, `app_name`, `started_at`, `input_tokens`, `output_tokens` and `outcome` are required. `outcome` is `done`, `timed_out`, `failed` or `cancelled`; `duration_seconds`, `model`, `cost_estimate` and `detail` may be null; `currency`, an ISO 4217 code, goes beside a cost. `detail` is the host's own sentence about how the run ended, drawn as given, so it is written for the person reading. A runner's error message is not one: on a hosted run it can carry what a provider said about the operator's key (see [Hosted runs](#hosted-runs)).
+**Run row.** `app_id`, `app_name`, `started_at`, `input_tokens`, `output_tokens` and `outcome` are required. `outcome` is `done`, `timed_out`, `failed` or `cancelled`; `duration_seconds`, `model`, `cost_estimate` and `detail` may be null; `currency`, an ISO 4217 code, goes beside a cost. `credits`, a count, is what the host's credits paid for the run, left out or null when they paid nothing for it: `RunHistory` draws a Credits column beside the tokens once any row carries one, and a dash for a row that does not. `detail` is the host's own sentence about how the run ended, drawn as given, so it is written for the person reading. A runner's error message is not one: on a hosted run it can carry what a provider said about the operator's key (see [Hosted runs](#hosted-runs)).
 
 ```json
 {
