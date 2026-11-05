@@ -90,6 +90,12 @@
     return value;
   }
 
+  /* A count a document may leave out: `null` when it does. */
+  function countOrNone(doc, key) {
+    if (doc[key] === undefined || doc[key] === null) return null;
+    return countMember(doc, key);
+  }
+
   function amountMember(doc, key, nullable) {
     const value = doc[key];
     if ((value === undefined || value === null) && nullable) return null;
@@ -167,6 +173,8 @@
         model: textMember(row, 'model', false),
         inputTokens: countMember(row, 'input_tokens'),
         outputTokens: countMember(row, 'output_tokens'),
+        /* What the host's credits paid for the run, when they paid for it. */
+        credits: countOrNone(row, 'credits'),
         costEstimate,
         currency: costEstimate === null ? '' : currencyMember(row, 'currency'),
         outcome: textMember(row, 'outcome', true),
@@ -511,6 +519,10 @@
         if (read.refusal) refusals.push(read.refusal);
         else runs.push(read.value);
       });
+      /* A host whose runs no credits paid for has no such column. */
+      const showCredits = runs.some(function (run) {
+        return run.credits !== null;
+      });
 
       if (!runs.length) {
         if (!refusals.length) block.appendChild(el('p', 'gh-empty', options.emptyText || 'No runs yet.'));
@@ -531,6 +543,7 @@
         headRow.appendChild(headCell('Duration', true));
         headRow.appendChild(headCell('Tokens in', true));
         headRow.appendChild(headCell('Tokens out', true));
+        if (showCredits) headRow.appendChild(headCell('Credits', true));
         /* The column says what the figure is. A run's cost is the host's
          * estimate from token counts and a price list, never a bill. */
         headRow.appendChild(headCell('Cost (estimate)', true));
@@ -551,6 +564,7 @@
           row.appendChild(cell(run.durationSeconds === null ? '—' : formatted.duration(run.durationSeconds), true));
           row.appendChild(cell(formatted.count(run.inputTokens), true));
           row.appendChild(cell(formatted.count(run.outputTokens), true));
+          if (showCredits) row.appendChild(cell(run.credits === null ? '—' : formatted.count(run.credits), true));
           row.appendChild(cell(run.costEstimate === null ? '—' : formatted.money(run.costEstimate, run.currency), true));
           row.appendChild(cell(run.model || '—', false));
           body.appendChild(row);

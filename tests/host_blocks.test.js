@@ -240,6 +240,9 @@ suite('a document is read whole, or refused whole', () => {
     expect(NS.hostData.VERSION).toBe(1);
     expect(NS.hostData.readUsageSummary(fixture('usage.json')).value.runs).toBe(128);
     expect(NS.hostData.readRunRow({ v: 1 }).refusal).toBe('"app_id" is missing.');
+    const [done] = fixture('runs.json');
+    expect(NS.hostData.readRunRow(done).value.credits).toBeNull();
+    expect(NS.hostData.readRunRow(Object.assign({}, done, { credits: 18 })).value.credits).toBe(18);
   });
 });
 
@@ -348,6 +351,48 @@ suite('a run history', () => {
     ]);
     expect(words(rows[2].lastElementChild)).toBe('—');
     expect(words(rows[1].lastElementChild)).toBe('claude-sonnet-4-6');
+  });
+
+  it('draws no credits column when no run carries credits', () => {
+    const container = drawRuns(fixture('runs.json'));
+    expect([...container.querySelectorAll('thead th')].map(words)).not.toContain('Credits');
+    expect(container.querySelector('tbody .gh-run').children).toHaveLength(8);
+  });
+
+  it('draws what credits paid for a run beside its tokens, and a dash for a run they paid nothing for', () => {
+    const [done, timedOut, failed, cancelled] = fixture('runs.json');
+    const container = drawRuns([
+      Object.assign({}, done, { credits: 1840 }),
+      Object.assign({}, timedOut, { credits: 0 }),
+      failed,
+      Object.assign({}, cancelled, { credits: null }),
+    ]);
+    const heads = [...container.querySelectorAll('thead th')].map(words);
+    expect(heads).toEqual(['Started', 'App', 'Outcome', 'Duration', 'Tokens in', 'Tokens out', 'Credits', 'Cost (estimate)', 'Model']);
+    const figures = row => [...row.querySelectorAll('.gh-num')].map(words);
+    expect([...container.querySelectorAll('tbody .gh-run')].map(figures)).toEqual([
+      ['38 s', '11,860', '3,420', '1,840', '$0.06'],
+      ['4 min', '52,210', '0', '0', '$0.16'],
+      ['under 1 s', '0', '0', '—', '—'],
+      ['2 min 5 s', '410', '12', '—', '< $0.01'],
+    ]);
+  });
+
+  it('keeps the credits column on a page about one app', () => {
+    const [done] = fixture('runs.json');
+    const container = drawRuns([Object.assign({}, done, { credits: 12 })], { showApp: false });
+    expect([...container.querySelectorAll('thead th')].map(words)).toEqual(['Started', 'Outcome', 'Duration', 'Tokens in', 'Tokens out', 'Credits', 'Cost (estimate)', 'Model']);
+    expect(container.querySelector('tbody .gh-run').children).toHaveLength(8);
+  });
+
+  it('refuses a run row whose credits are not a count', () => {
+    const [done] = fixture('runs.json');
+    for (const credits of [-1, 2.5, '18']) {
+      const container = drawRuns([Object.assign({}, done, { credits })]);
+      expect(container.querySelector('.gh-run')).toBeNull();
+      expect(words(container.querySelector('.gh-note'))).toBe('1 run could not be shown. "credits" is not a count.');
+      container.remove();
+    }
   });
 
   it('drops the app column for a page about one app', () => {
