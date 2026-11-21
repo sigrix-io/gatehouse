@@ -437,15 +437,29 @@ suite('the level of the title', () => {
     }
   });
 
+  it('reads numeric text as the number, as the host blocks do', async () => {
+    expect((await titleOf({ titleLevel: '2' })).tagName).toBe('H2');
+    expect((await titleOf({ titleLevel: ' 3 ' })).tagName).toBe('H3');
+  });
+
   it('draws the default for a level that is not 1 to 6', async () => {
-    for (const bad of [0, 7, -1, 2.5, '', 'h2', null, NaN, {}, [], true]) {
-      expect((await titleOf({ titleLevel: bad })).tagName, String(bad)).toBe('H1');
+    for (const bad of [0, 7, -1, 2.5, '', 'h2', '2.5', null, NaN, {}, [], [2], 2n, true, Symbol('2'), Object.create(null)]) {
+      expect((await titleOf({ titleLevel: bad })).tagName, typeof bad).toBe('H1');
     }
   });
 
   it('leaves exactly one title heading, and no other h1, at any level', async () => {
+    // A describe with examples and a markdown result, so the two other places
+    // the renderer makes a heading (above the examples, and a result's own
+    // headings) are on the page being counted.
+    const composition = { version: 'sigrix_ui/0.1', template: 'form-to-result', output: { mode: 'markdown' } };
     for (const level of [1, 2, 6]) {
-      const { container } = await mount(doc.describe(), doc.status(), undefined, { titleLevel: level });
+      const { container, renderer } = await mount(
+        fixture('with_examples.describe.json'), doc.status(), undefined, { titleLevel: level, composition }
+      );
+      renderer.showResult({ type: 'text', value: '# Top\n\n## Next\n\nbody' });
+      expect(container.querySelector('.run-templates-title').tagName).toBe('H2');
+      expect(container.querySelectorAll('.run-md-heading').length).toBe(2);
       expect(container.querySelectorAll('.run-title').length).toBe(1);
       expect(container.querySelectorAll('h1').length).toBe(level === 1 ? 1 : 0);
     }

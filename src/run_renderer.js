@@ -37,11 +37,13 @@
   }
 
   /* `options.titleLevel`: which heading the bundle's name is drawn as, 1 to 6.
-   * Anything else (absent, 0, 7, 2.5, text) is the default, 1, so a page that
-   * asks for nothing keeps the `<h1>` it has always had. A host that already
-   * has an `<h1>` of its own passes 2. */
+   * A number, or text that reads as one ('2'), as `headingLevel` does in the
+   * host blocks. Anything that does not read as a whole number from 1 to 6
+   * (absent, 0, 7, 2.5, other text, other types) is the default, 1, so a page
+   * that asks for nothing keeps the `<h1>` it has always had. A host that
+   * already has an `<h1>` of its own passes 2. */
   function titleLevel(option) {
-    const level = Number(option);
+    const level = typeof option === 'number' || typeof option === 'string' ? Number(option) : NaN;
     return Number.isInteger(level) && level >= 1 && level <= 6 ? level : 1;
   }
 
@@ -791,8 +793,9 @@
       const target = into || this.nodes.rendered;
       NS.viewModel.outputBlocks(value).forEach(function (block) {
         if (block.kind === 'heading') {
-          /* Clamped to h2..h4: the page's own `<h1>` is the agent's name, and
-           * an agent that emits `#` is describing its answer, not the page. */
+          /* Clamped to h2..h4: the page has an `<h1>` (the agent's name by
+           * default, or the host's own when `titleLevel` moves it), and an
+           * agent that emits `#` is describing its answer, not the page. */
           const level = Math.min(4, Math.max(2, block.level + 1));
           target.appendChild(el('h' + level, 'run-md-heading', block.text));
           return;
