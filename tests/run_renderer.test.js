@@ -62,11 +62,11 @@ function stubClient(describeDoc, statusDoc, overrides) {
   );
 }
 
-async function mount(describeDoc, statusDoc, overrides) {
+async function mount(describeDoc, statusDoc, overrides, options) {
   const NS = loadRenderer();
   const container = document.createElement('div');
   document.body.appendChild(container);
-  const renderer = new NS.RunRenderer(container, stubClient(describeDoc, statusDoc, overrides));
+  const renderer = new NS.RunRenderer(container, stubClient(describeDoc, statusDoc, overrides), options);
   await renderer.load();
   return { NS, container, renderer };
 }
@@ -410,5 +410,44 @@ suite('several renderers on one page', () => {
     page.renderer.render();
     const after = [...page.container.querySelectorAll('[id]')].map(node => node.id);
     expect(after).toEqual(before);
+  });
+});
+
+suite('the level of the title', () => {
+  const doc = DOCUMENTS['the conformance fake'];
+  const titleOf = async options => {
+    const { container } = await mount(doc.describe(), doc.status(), undefined, options);
+    return container.querySelector('.run-title');
+  };
+
+  it('is an h1 when no level is given, with the class the stylesheet dresses', async () => {
+    const title = await titleOf(undefined);
+    expect(title.tagName).toBe('H1');
+    expect(title.textContent).toBe(doc.describe().agent.name);
+    expect((await titleOf({})).tagName).toBe('H1');
+    expect((await titleOf({ titleLevel: 1 })).tagName).toBe('H1');
+  });
+
+  it('draws the level a host asks for, keeping the class and the text', async () => {
+    for (const level of [2, 3, 4, 5, 6]) {
+      const title = await titleOf({ titleLevel: level });
+      expect(title.tagName).toBe('H' + level);
+      expect(title.className).toBe('run-title');
+      expect(title.textContent).toBe(doc.describe().agent.name);
+    }
+  });
+
+  it('draws the default for a level that is not 1 to 6', async () => {
+    for (const bad of [0, 7, -1, 2.5, '', 'h2', null, NaN, {}, [], true]) {
+      expect((await titleOf({ titleLevel: bad })).tagName, String(bad)).toBe('H1');
+    }
+  });
+
+  it('leaves exactly one title heading, and no other h1, at any level', async () => {
+    for (const level of [1, 2, 6]) {
+      const { container } = await mount(doc.describe(), doc.status(), undefined, { titleLevel: level });
+      expect(container.querySelectorAll('.run-title').length).toBe(1);
+      expect(container.querySelectorAll('h1').length).toBe(level === 1 ? 1 : 0);
+    }
   });
 });

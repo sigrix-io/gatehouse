@@ -5,6 +5,15 @@ follows [VERSIONING.md](VERSIONING.md), which is worth reading before pinning.
 
 ## [Unreleased]
 
+### Added
+
+- `options.titleLevel` on `RunRenderer`, 1 to 6: the level of the heading the
+  bundle's name is drawn as. It is 1 by default, so a page that asks for
+  nothing is drawn as before, with its `<h1 class="run-title">`; a host page
+  that has an `<h1>` of its own passes 2 and no longer has two. Any other
+  value is the default. The class is kept, so the stylesheet still dresses
+  the name at every level.
+
 ## [0.5.0] — 2026-11-05
 
 ### Added

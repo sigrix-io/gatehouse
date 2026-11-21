@@ -53,7 +53,7 @@ Each script is an IIFE that adds to one global, `window.Gatehouse`. `window.Sigr
 | Constructor | Arguments |
 | --- | --- |
 | `PosternClient(baseUrl, options)` | `baseUrl`: where the runner (or the proxy) answers; every request goes to it under `/postern/v0`. `options.headers`: extra headers for every request. `options.fetchImpl`: a `fetch` to use instead of the page's. |
-| `RunRenderer(container, client, options)` | `container`: the element to draw into. `client`: anything with the four verbs. `options.composition`, `options.choice`, `options.hosted`, `options.conversation`: below. |
+| `RunRenderer(container, client, options)` | `container`: the element to draw into. `client`: anything with the four verbs. `options.composition`, `options.choice`, `options.hosted`, `options.conversation`: below. `options.titleLevel`: the heading level of the bundle's name, 1 to 6, default 1 (see [The title's level](#the-titles-level)). |
 
 `renderer.load()` reads `describe` and `status` and draws the page. Running, stopping and retrying are the page's own buttons.
 
@@ -69,6 +69,16 @@ Each is held by a test rather than by memory (`tests/contract.test.js` and the s
 - **Zero imports, and no distributor.** Nothing here names a marketplace or a listing.
 - **Documents are handed in.** The composition and the choice arrive as data from whoever mounted the page, and so does everything the host blocks and the playbook block draw. Fetching them here would be reaching for a fifth verb, and Postern has four.
 - **A link goes only to a web address.** An address a runner's author wrote becomes a link only when it is an absolute `http` or `https` one, so a `javascript:` address in `describe` is never something a click runs.
+
+## The title's level
+
+The run page draws the bundle's name as `<h1 class="run-title">`, which is right for a page that is nothing but the run page. A host page that already has an `<h1>` of its own passes `titleLevel: 2` (or any whole number from 1 to 6), and the name is drawn as that level instead, with the same class and the same text:
+
+```js
+new Gatehouse.RunRenderer(container, client, { titleLevel: 2 });
+```
+
+Anything else (absent, `0`, `7`, `2.5`, text) is the default, 1. Only the name's level moves: the heading above the examples stays an `<h2>`, and a result's own headings stay between `<h2>` and `<h4>`, so at `titleLevel: 2` they sit beside the name and skip no level beneath it. The renderer draws no other `<h1>`.
 
 ## The composition
 

@@ -36,6 +36,15 @@
     return null;
   }
 
+  /* `options.titleLevel`: which heading the bundle's name is drawn as, 1 to 6.
+   * Anything else (absent, 0, 7, 2.5, text) is the default, 1, so a page that
+   * asks for nothing keeps the `<h1>` it has always had. A host that already
+   * has an `<h1>` of its own passes 2. */
+  function titleLevel(option) {
+    const level = Number(option);
+    return Number.isInteger(level) && level >= 1 && level <= 6 ? level : 1;
+  }
+
   function randomKey() {
     /* An idempotency key only has to be unique to this client (SPEC 4.2). */
     if (root.crypto && typeof root.crypto.randomUUID === 'function') return root.crypto.randomUUID();
@@ -61,8 +70,9 @@
      * of the others apply (`inputChoice` in the view model has its shape): a
      * fact the host read about this runner, handed in for the composition's
      * reason. `options.conversation` keeps each brief and answer on the page
-     * and sends them with the next brief (`renderConversation`). Nothing else
-     * is read. */
+     * and sends them with the next brief (`renderConversation`).
+     * `options.titleLevel` (1 to 6, default 1) is the level of the heading the
+     * bundle's name is drawn as (`titleLevel`). Nothing else is read. */
     constructor(container, client, options) {
       const settings = options || {};
       this.container = container;
@@ -82,6 +92,7 @@
       this.lastRunId = '';
       this.lastInputsKey = '';
       this.idempotencyKey = '';
+      this.titleLevel = titleLevel(settings.titleLevel);
       this.onRunStateChange = settings.onRunStateChange || function () {};
       this.conversation = conversationSettings(settings.conversation);
       /* Held here and nowhere else: the page forgets the conversation when it
@@ -138,7 +149,7 @@
 
     renderHeader(vm) {
       const section = el('section', 'run-header');
-      section.appendChild(el('h1', 'run-title', vm.header.name));
+      section.appendChild(el('h' + this.titleLevel, 'run-title', vm.header.name));
       if (vm.header.summary) section.appendChild(el('p', 'run-summary', vm.header.summary));
       const meta = el('p', 'run-meta');
       /* Verbatim, both of them: the identifier is what the buyer types into
