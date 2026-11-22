@@ -465,3 +465,54 @@ suite('the level of the title', () => {
     }
   });
 });
+
+suite('the level of a result\'s headings, beneath the title', () => {
+  const doc = DOCUMENTS['the conformance fake'];
+  const composition = { version: 'sigrix_ui/0.1', template: 'form-to-result', output: { mode: 'markdown' } };
+  const answer = ['# one', '## two', '### three', '#### four', '##### five', '###### six', 'body'].join('\n\n');
+
+  // What a host does: mount with options, then a result arrives.
+  const drawn = async options => {
+    const { container, renderer } = await mount(doc.describe(), doc.status(), undefined, { ...options, composition });
+    renderer.showResult({ type: 'text', value: answer });
+    return {
+      title: Number(container.querySelector('.run-title').tagName.slice(1)),
+      levels: [...container.querySelectorAll('.run-md-heading')].map(h => Number(h.tagName.slice(1))),
+      texts: [...container.querySelectorAll('.run-md-heading')].map(h => h.textContent)
+    };
+  };
+
+  // title level -> drawn level of #, ##, ###, ####, #####, ######
+  const TABLE = {
+    1: [2, 3, 4, 4, 4, 4],
+    2: [3, 4, 5, 5, 5, 5],
+    3: [4, 5, 6, 6, 6, 6],
+    4: [5, 6, 6, 6, 6, 6],
+    5: [6, 6, 6, 6, 6, 6],
+    6: [6, 6, 6, 6, 6, 6]
+  };
+
+  it('draws h2 to h4 when no level is given, as it always has', async () => {
+    for (const options of [undefined, {}]) {
+      const page = await drawn(options);
+      expect(page.title).toBe(1);
+      expect(page.levels).toEqual(TABLE[1]);
+    }
+  });
+
+  for (const level of [1, 2, 3, 4, 5, 6]) {
+    it('starts one below a title at level ' + level + ' and keeps the order beneath it', async () => {
+      const page = await drawn({ titleLevel: level });
+      expect(page.title).toBe(level);
+      expect(page.texts).toEqual(['one', 'two', 'three', 'four', 'five', 'six']);
+      expect(page.levels).toEqual(TABLE[level]);
+      // Never above the title's rank (a smaller number), never past h6, and
+      // never deeper before shallower.
+      page.levels.forEach((drawnLevel, i) => {
+        expect(drawnLevel).toBeGreaterThanOrEqual(Math.min(6, level + 1));
+        expect(drawnLevel).toBeLessThanOrEqual(6);
+        if (i > 0) expect(drawnLevel).toBeGreaterThanOrEqual(page.levels[i - 1]);
+      });
+    });
+  }
+});

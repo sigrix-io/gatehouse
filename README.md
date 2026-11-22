@@ -78,7 +78,7 @@ The run page draws the bundle's name as `<h1 class="run-title">`, which is right
 new Gatehouse.RunRenderer(container, client, { titleLevel: 2 });
 ```
 
-A number or numeric text (`'2'`) is read as a level; anything that does not read as a whole number from 1 to 6 (absent, `0`, `7`, `2.5`, other text) is the default, 1. Pass 2 for a page that has an `<h1>` of its own; from 3 on, the heading above the examples and a result's top heading are both `<h2>` and outrank the name. Only the name's level moves: the heading above the examples stays an `<h2>`, and a result's own headings stay between `<h2>` and `<h4>`, so at `titleLevel: 2` they sit beside the name and skip no level beneath it. The renderer draws no other `<h1>`.
+A number or numeric text (`'2'`) is read as a level; anything that does not read as a whole number from 1 to 6 (absent, `0`, `7`, `2.5`, other text) is the default, 1. Pass 2 for a page that has an `<h1>` of its own; from 3 on, the heading above the examples is an `<h2>` and outranks the name. A result's own headings (Markdown output) sit beneath the name: `#` is drawn one level below it, each `#` after it one level further, over three levels, and nothing is drawn past `<h6>` (what would be stays at `<h6>`). At the default level that is `<h2>` to `<h4>`, as ever; at `titleLevel: 2`, `#` is an `<h3>` and `##` an `<h4>`. The heading above the examples stays an `<h2>`. The renderer draws no other `<h1>`.
 
 ## The composition
 
