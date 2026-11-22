@@ -5,6 +5,19 @@ follows [VERSIONING.md](VERSIONING.md), which is worth reading before pinning.
 
 ## [Unreleased]
 
+## [0.5.1] — 2026-11-22
+
+### Fixed
+
+- With `options.titleLevel` set, a Markdown result's headings now sit beneath
+  the title instead of beside it. They were clamped to `<h2>`–`<h4>` whatever
+  the title's level was, so at `titleLevel: 2` a result's top heading was an
+  `<h2>`, the same level as the run's name. `#` is now drawn one level below
+  the title and each `#` after it one level further, over three levels, and
+  never past `<h6>`. With no level given nothing changes (`<h2>` to `<h4>`).
+  At `titleLevel: 6` there is no level below the title, so a result's headings
+  are `<h6>`. The stylesheet styles them by class, so nothing looks different.
+
 ## [0.5.0] — 2026-11-21
 
 ### Added

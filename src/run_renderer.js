@@ -791,12 +791,16 @@
 
     renderMarkdown(value, into) {
       const target = into || this.nodes.rendered;
+      const title = this.titleLevel;
       NS.viewModel.outputBlocks(value).forEach(function (block) {
         if (block.kind === 'heading') {
-          /* Clamped to h2..h4: the page has an `<h1>` (the agent's name by
-           * default, or the host's own when `titleLevel` moves it), and an
-           * agent that emits `#` is describing its answer, not the page. */
-          const level = Math.min(4, Math.max(2, block.level + 1));
+          /* A result's headings sit beneath the title, never beside it: `#`
+           * is drawn one level below the title and each `#` after it one
+           * level further, over three levels (title + 1 to title + 3), the
+           * span h2..h4 has always had under the default h1. Past h6 they
+           * stay at h6. An agent that emits `#` is describing its answer, not
+           * the page. */
+          const level = Math.min(6, title + 3, title + block.level);
           target.appendChild(el('h' + level, 'run-md-heading', block.text));
           return;
         }
